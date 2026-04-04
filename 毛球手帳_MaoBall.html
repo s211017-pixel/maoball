@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>毛球手帳 · MaoBall</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Noto+Serif+TC:wght@300;400&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & BASE ─── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F3E8;--paper2:#EDE8D8;--paper3:#E4DECA;
+  --ink:#2D2820;--ink2:#6B6050;--ink3:#A89880;--ink4:#C8BCAA;
+  --red:#C8503A;--green:#6A9E6E;--blue:#5A8FAE;--purple:#8A78B8;
+  --gold:#C8922A;--pink:#D87890;--teal:#5A9898;
+  --sky:#B8D8E8;--cream:#F5EFDE;
+  --font-draw:'Caveat',cursive;
+  --font-serif:'Noto Serif TC',serif;
+  --font-sans:'Noto Sans TC',sans-serif;
+  /* ── Font scale: 1 = normal, 1.15 = large, 1.3 = extra-large ── */
+  --fs:1;
+  --fs-xs:  calc(.68rem * var(--fs));
+  --fs-sm:  calc(.8rem  * var(--fs));
+  --fs-md:  calc(.92rem * var(--fs));
+  --fs-base:calc(1rem   * var(--fs));
+  --fs-lg:  calc(1.1rem * var(--fs));
+  --fs-xl:  calc(1.35rem* var(--fs));
+  --fs-2xl: calc(1.5rem * var(--fs));
+}
+html{font-size:calc(16px * var(--fs))}
+html,body{height:100%;background:var(--paper);color:var(--ink);font-family:var(--font-serif);-webkit-font-smoothing:antialiased}
+button{font-family:var(--font-draw);cursor:pointer}
+input,textarea,select{font-family:var(--font-serif);font-size:var(--fs-md)}
+
+/* ─── PAPER TEXTURE ─── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.6;
+}
+
+/* ─── HEADER ─── */
+header{
+  position:sticky;top:0;z-index:60;
+  background:var(--paper2);
+  border-bottom:2px solid var(--ink4);
+  padding:.4rem .75rem .0rem;
+}
+.header-row1{display:flex;align-items:center;justify-content:space-between;padding-bottom:.3rem}
+.logo{
+  font-family:var(--font-draw);font-size:calc(1.4rem * var(--fs));font-weight:700;
+  color:var(--ink);letter-spacing:.06em;
+  display:flex;align-items:center;gap:.4rem;
+}
+.logo span{font-size:var(--fs-xs);font-weight:400;color:var(--ink3);letter-spacing:.12em}
+.nav-toggle{
+  background:none;border:1.5px solid var(--ink4);border-radius:8px 10px 7px 9px;
+  padding:.2rem .55rem;font-size:var(--fs-sm);color:var(--ink3);
+  cursor:pointer;transition:all .2s;line-height:1;
+}
+.nav-toggle:hover{background:var(--paper3);color:var(--ink)}
+.tab-nav{
+  display:flex;gap:0;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  overflow:hidden;max-height:42px;
+  transition:max-height .35s ease,opacity .3s;opacity:1;
+}
+.tab-nav.collapsed{max-height:0;opacity:0;pointer-events:none}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{
+  background:none;border:none;border-bottom:2.5px solid transparent;
+  font-size:var(--fs-md);color:var(--ink3);padding:.5rem .7rem;
+  transition:color .25s,border-color .25s;white-space:nowrap;flex-shrink:0;
+}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--ink)}
+
+/* ─── VIEWS ─── */
+.view{display:none;padding:1.25rem;max-width:940px;margin:0 auto;position:relative;z-index:1}
+.view.active{display:block}
+
+/* ─── HAND-DRAWN CARD ─── */
+.hcard{
+  background:var(--cream);
+  border:2px solid var(--ink4);
+  border-radius:12px 14px 11px 13px;
+  box-shadow:3px 4px 0 var(--ink4);
+  padding:1.1rem;
+  transition:transform .2s,box-shadow .2s;
+}
+.hcard:hover{transform:translateY(-2px);box-shadow:4px 6px 0 var(--ink4)}
+
+.sec-title{
+  font-family:var(--font-draw);font-size:var(--fs-xl);font-weight:700;
+  color:var(--ink);margin-bottom:1.1rem;display:flex;align-items:center;gap:.4rem;
+}
+.sec-title::after{
+  content:'';flex:1;height:1.5px;
+  background:repeating-linear-gradient(90deg,var(--ink4) 0,var(--ink4) 4px,transparent 4px,transparent 8px);
+  margin-left:.3rem;
+}
+
+/* ── DRAWING BORDER for section lines ── */
+.sketch-line{
+  border:none;height:1.5px;
+  background:repeating-linear-gradient(90deg,var(--ink4) 0,var(--ink4) 6px,transparent 6px,transparent 10px);
+  margin:1rem 0;
+}
+
+/* ═══════════════════════════════
+   CALENDAR VIEW
+═══════════════════════════════ */
+.cal-wrap{max-width:540px;margin:0 auto}
+.cal-bottom{margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+@media(max-width:540px){.cal-bottom{grid-template-columns:1fr}}
+
+.cal-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1rem;
+}
+.cal-title{
+  font-family:var(--font-draw);font-size:var(--fs-2xl);font-weight:700;letter-spacing:.05em;
+  cursor:pointer;padding:.2rem .6rem;border-radius:8px;transition:background .2s;
+  position:relative;user-select:none;
+}
+.cal-title:hover{background:var(--paper2)}
+.cal-title::after{
+  content:'▾';font-size:var(--fs-sm);margin-left:.35rem;color:var(--ink3);vertical-align:.1em;
+}
+
+/* Year/month quick-picker dropdown */
+#cal-picker{
+  position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--paper);border:2px solid var(--ink4);border-radius:12px 14px 11px 13px;
+  box-shadow:4px 5px 0 var(--ink4);z-index:50;padding:.85rem;
+  min-width:220px;
+  display:none;
+}
+#cal-picker.open{display:block}
+.cp-year-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:.75rem;
+}
+.cp-year{font-family:var(--font-draw);font-size:var(--fs-lg);font-weight:700;min-width:60px;text-align:center}
+.cp-arr{
+  background:none;border:1.5px solid var(--ink4);border-radius:6px;
+  font-size:var(--fs-base);padding:.1rem .45rem;color:var(--ink2);cursor:pointer;
+  transition:background .2s;
+}
+.cp-arr:hover{background:var(--paper2)}
+.cp-months{display:grid;grid-template-columns:repeat(4,1fr);gap:.35rem}
+.cp-mo{
+  background:none;border:1.5px solid transparent;border-radius:7px 9px 6px 8px;
+  font-family:var(--font-draw);font-size:var(--fs-md);color:var(--ink3);
+  padding:.35rem .1rem;cursor:pointer;transition:all .18s;text-align:center;
+}
+.cp-mo:hover{background:var(--paper2);border-color:var(--ink4);color:var(--ink)}
+.cp-mo.cur{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.cal-arrow{
+  background:none;border:2px solid var(--ink4);border-radius:8px 10px 7px 9px;
+  font-size:var(--fs-lg);padding:.2rem .6rem;color:var(--ink2);
+  transition:background .2s;
+}
+.cal-arrow:hover{background:var(--paper2)}
+.cal-wdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:.3rem}
+.cal-wd{
+  text-align:center;font-family:var(--font-draw);font-size:var(--fs-sm);
+  color:var(--ink3);padding:.25rem 0;
+}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-cell{
+  aspect-ratio:1;min-height:42px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1px;
+  cursor:pointer;border-radius:8px 10px 7px 9px;
+  font-family:var(--font-draw);font-size:var(--fs-md);
+  transition:all .2s;position:relative;border:1.5px solid transparent;
+}
+.cal-cell:hover{background:var(--paper2);border-color:var(--ink4)}
+.cal-cell.other{opacity:.2;pointer-events:none}
+.cal-cell.today{background:var(--ink);color:var(--paper);font-weight:700}
+.cal-cell.has-holiday{
+  box-shadow:inset 0 0 0 2px var(--hcol,rgba(200,80,58,.4));
+}
+.cal-cell.today.has-holiday{
+  box-shadow:inset 0 0 0 2px var(--hcol,rgba(200,80,58,.55)),inset 0 0 0 999px var(--ink);
+}
+/* Holiday name tooltip inside cell */
+.cal-cell .htip{
+  position:absolute;bottom:2px;left:0;right:0;
+  font-family:var(--font-draw);font-size:calc(.46rem * var(--fs));line-height:1;
+  color:var(--ink3);text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  padding:0 2px;pointer-events:none;letter-spacing:.02em;
+}
+.cal-cell .dnum{font-size:var(--fs-sm);line-height:1}
+.cal-cell .dmood{font-size:var(--fs-md);line-height:1}
+
+/* Holiday sidebar */
+.holiday-list{display:flex;flex-direction:column;gap:.6rem}
+.h-item{
+  display:flex;align-items:center;gap:.5rem;
+  font-family:var(--font-draw);font-size:var(--fs-md);
+  padding:.4rem .6rem;border-radius:8px 10px 7px 9px;
+  border:1.5px solid var(--ink4);background:var(--cream);
+}
+.h-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.h-days{font-size:var(--fs-xs);color:var(--ink3);margin-left:auto;white-space:nowrap}
+.h-custom{border-style:dashed}
+
+/* Custom holiday form */
+.add-h-form{
+  display:flex;flex-direction:column;gap:.5rem;margin-top:.8rem;
+}
+.add-h-form input{
+  border:1.5px solid var(--ink4);border-radius:8px;
+  background:var(--paper);padding:.45rem .65rem;font-family:var(--font-draw);font-size:var(--fs-md);
+  outline:none;width:100%;color:var(--ink);
+}
+.add-h-form input:focus{border-color:var(--ink2)}
+.ink-btn{
+  background:var(--ink);color:var(--paper);border:none;
+  border-radius:8px 10px 7px 9px;
+  font-family:var(--font-draw);font-size:var(--fs-md);font-weight:600;
+  padding:.5rem 1.1rem;transition:opacity .2s;
+}
+.ink-btn:hover{opacity:.85}
+.ghost-btn{
+  background:none;border:1.5px solid var(--ink4);
+  border-radius:8px 10px 7px 9px;
+  font-family:var(--font-draw);font-size:var(--fs-md);color:var(--ink2);
+  padding:.45rem 1rem;transition:all .2s;
+}
+.ghost-btn:hover{border-color:var(--ink2);background:var(--paper2)}
+
+/* ═══════════════════════════════
+   TODO VIEW
+═══════════════════════════════ */
+.todo-add{display:flex;gap:.5rem;margin-bottom:.55rem}
+.todo-add input{
+  flex:1;border:2px solid var(--ink4);border-radius:10px 12px 9px 11px;
+  background:var(--cream);padding:.55rem .85rem;
+  font-family:var(--font-draw);font-size:var(--fs-base);color:var(--ink);outline:none;
+}
+.todo-add input:focus{border-color:var(--ink2)}
+/* Eisenhower quadrant pills */
+.eis-row{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:1rem}
+.eis-btn{
+  background:none;border:1.5px solid var(--ink4);border-radius:20px;
+  padding:.28rem .72rem;font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3);
+  cursor:pointer;transition:all .22s;display:flex;align-items:center;gap:.25rem;
+}
+.eis-btn.sel{color:#fff;border-color:transparent}
+.eis-btn[data-q="1"].sel{background:#C8503A}
+.eis-btn[data-q="2"].sel{background:#6A9E6E}
+.eis-btn[data-q="3"].sel{background:#C8922A}
+.eis-btn[data-q="4"].sel{background:#A89880}
+/* todo priority dot */
+.q-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.q1{background:#C8503A}.q2{background:#6A9E6E}.q3{background:#C8922A}.q4{background:#A89880}
+.todo-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.2rem}
+.todo-item{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.6rem .85rem;border-radius:10px 12px 9px 11px;
+  border:1.5px solid var(--ink4);background:var(--cream);
+  transition:all .3s;
+}
+.todo-item.done{opacity:.5;}
+.todo-item .tcb{
+  width:20px;height:20px;border-radius:4px 6px 4px 5px;
+  border:2px solid var(--ink3);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .25s;background:var(--paper);cursor:pointer;
+}
+.todo-item.done .tcb{background:var(--green);border-color:var(--green);color:#fff}
+.todo-item .tlabel{font-family:var(--font-draw);font-size:var(--fs-base);flex:1;cursor:pointer}
+.todo-item.done .tlabel{text-decoration:line-through}
+.todo-item .tdel{
+  background:none;border:none;color:var(--ink4);font-size:1rem;
+  transition:color .2s;padding:.1rem .3rem;
+}
+.todo-item .tdel:hover{color:var(--red)}
+
+/* Animal celebration popup */
+#animal-pop{
+  position:fixed;bottom:2rem;right:2rem;z-index:300;
+  display:none;flex-direction:column;align-items:center;gap:.3rem;
+  animation:anipop .4s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes anipop{
+  0%{transform:scale(0) translateY(20px);opacity:0}
+  60%{transform:scale(1.15) translateY(-4px)}
+  100%{transform:scale(1) translateY(0);opacity:1}
+}
+#animal-pop .a-bubble{
+  background:#fff;border:2px solid var(--ink4);border-radius:14px;
+  padding:.6rem .9rem;font-family:var(--font-draw);font-size:var(--fs-md);
+  max-width:180px;text-align:center;
+  box-shadow:3px 3px 0 var(--ink4);
+  position:relative;
+}
+#animal-pop .a-bubble::after{
+  content:'';position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);
+  border:9px solid transparent;border-top-color:var(--ink4);
+}
+#animal-pop .a-bubble::before{
+  content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);
+  border:9px solid transparent;border-top-color:#fff;z-index:1;
+}
+#animal-pop svg{filter:drop-shadow(2px 2px 3px rgba(0,0,0,.15))}
+
+/* ═══════════════════════════════
+   TRAVEL VIEW
+═══════════════════════════════ */
+.travel-header{text-align:center;margin-bottom:1.5rem}
+.t-title{font-family:var(--font-draw);font-size:calc(2rem * var(--fs));font-weight:700;letter-spacing:.06em}
+.t-sub{font-size:var(--fs-xs);letter-spacing:.22em;color:var(--ink3);font-family:var(--font-sans)}
+
+/* Mascot */
+#mascot{
+  display:flex;flex-direction:column;align-items:center;margin-bottom:1.5rem;
+}
+.m-bubble{
+  background:#fff;border:2px solid var(--ink4);border-radius:16px;
+  padding:.65rem 1.1rem;font-family:var(--font-draw);font-size:var(--fs-md);
+  line-height:1.65;max-width:290px;text-align:center;
+  box-shadow:3px 3px 0 var(--ink4);margin-bottom:.5rem;position:relative;
+}
+.m-bubble::after{
+  content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
+  border:10px solid transparent;border-top-color:var(--ink4);
+}
+.m-bubble::before{
+  content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+  border:10px solid transparent;border-top-color:#fff;z-index:1;
+}
+.mascot-svg{animation:mascotbounce 2.2s ease-in-out infinite}
+@keyframes mascotbounce{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-9px) rotate(1.5deg)}}
+
+/* Country tabs */
+.ctabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.5rem;justify-content:center}
+.ctab{
+  background:none;border:1.5px solid var(--ink4);border-radius:20px;
+  padding:.35rem .9rem;font-family:var(--font-draw);font-size:var(--fs-md);color:var(--ink3);
+  transition:all .25s;
+}
+.ctab.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* Spot grid */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+.scard{
+  border-radius:12px 14px 11px 13px;overflow:hidden;cursor:pointer;
+  background:var(--cream);border:2px solid var(--ink4);
+  box-shadow:3px 3px 0 var(--ink4);
+  transition:transform .3s,box-shadow .3s;
+}
+.scard:hover{transform:translateY(-4px) rotate(.5deg);box-shadow:5px 7px 0 var(--ink4)}
+.scard-illo{height:120px;overflow:hidden;position:relative}
+.scard-illo svg{width:100%;height:100%}
+.scard-badge{
+  position:absolute;top:.4rem;right:.4rem;
+  background:rgba(255,255,255,.92);border:1px solid var(--green);border-radius:20px;
+  padding:.12rem .5rem;font-family:var(--font-draw);font-size:var(--fs-xs);color:var(--green);
+}
+.scard-body{padding:.75rem .85rem}
+.scard-ctry{font-family:var(--font-draw);font-size:var(--fs-xs);letter-spacing:.15em;color:var(--ink3);margin-bottom:.15rem}
+.scard-name{font-family:var(--font-draw);font-size:var(--fs-lg);font-weight:700;margin-bottom:.2rem}
+.scard-tag{font-size:var(--fs-xs);color:var(--ink3)}
+
+/* ═══════════════════════════════
+   GAME ROOM
+═══════════════════════════════ */
+.diamonds-bar{
+  display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem;
+  padding:.7rem 1rem;background:var(--cream);
+  border:2px solid var(--ink4);border-radius:12px 14px 11px 13px;
+  box-shadow:3px 3px 0 var(--ink4);
+}
+.diamonds-bar .d-icon{font-size:1.5rem}
+.diamonds-bar .d-count{font-family:var(--font-draw);font-size:calc(1.6rem * var(--fs));font-weight:700;color:var(--blue)}
+.diamonds-bar .d-label{font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3)}
+
+.challenges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.8rem;margin-bottom:1.5rem}
+.challenge-card{
+  padding:.8rem;background:var(--cream);
+  border:2px solid var(--ink4);border-radius:12px 14px 11px 13px;
+  box-shadow:2px 3px 0 var(--ink4);transition:all .25s;
+}
+.challenge-card.done-c{opacity:.55;background:var(--paper2)}
+.challenge-card .cc-emoji{display:flex;align-items:center;justify-content:center;margin-bottom:.45rem;min-height:32px}
+.challenge-card .cc-title{font-family:var(--font-draw);font-size:var(--fs-md);font-weight:600;margin-bottom:.2rem}
+.challenge-card .cc-rew{font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--blue)}
+.challenge-card .cc-btn{
+  margin-top:.55rem;width:100%;padding:.4rem;
+  background:var(--ink);color:var(--paper);border:none;
+  border-radius:7px;font-family:var(--font-draw);font-size:var(--fs-sm);
+  transition:opacity .2s;
+}
+.challenge-card .cc-btn:hover{opacity:.8}
+.challenge-card.done-c .cc-btn{background:var(--green)}
+
+/* Badges */
+.badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.9rem}
+.badge-card{
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:1rem .7rem;background:var(--cream);
+  border:2px solid var(--ink4);border-radius:12px;
+  box-shadow:2px 3px 0 var(--ink4);
+  transition:all .3s;cursor:pointer;
+}
+.badge-card.locked{opacity:.38;filter:grayscale(.8)}
+.badge-card:hover:not(.locked){transform:translateY(-3px) rotate(1deg);box-shadow:4px 5px 0 var(--ink4)}
+.badge-card svg{margin-bottom:.5rem}
+.badge-name{font-family:var(--font-draw);font-size:var(--fs-md);font-weight:700;margin-bottom:.15rem}
+.badge-req{font-family:var(--font-draw);font-size:var(--fs-xs);color:var(--ink3)}
+
+/* Diamond earn animation */
+@keyframes diamondFly{
+  0%{transform:scale(0) translateY(0);opacity:1}
+  50%{transform:scale(1.4) translateY(-30px);opacity:1}
+  100%{transform:scale(0) translateY(-60px);opacity:0}
+}
+.d-fly{
+  position:fixed;z-index:500;pointer-events:none;
+  animation:diamondFly .9s ease forwards;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ═══════════════════════════════
+   PROFILE VIEW
+═══════════════════════════════ */
+.profile-wrap{display:flex;gap:1.25rem;flex-wrap:wrap}
+.profile-avatar{
+  width:130px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:.6rem;
+}
+.avatar-ring{
+  width:110px;height:110px;border-radius:50%;border:3px solid var(--ink4);
+  background:var(--paper2);display:flex;align-items:center;justify-content:center;font-size:3.2rem;
+  box-shadow:3px 3px 0 var(--ink4);
+}
+.profile-form{flex:1;min-width:220px;display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+@media(max-width:480px){.profile-form{grid-template-columns:1fr}}
+.pf-group{display:flex;flex-direction:column;gap:.25rem}
+.pf-group.full{grid-column:1/-1}
+.pf-label{font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3)}
+.pf-input{
+  border:1.5px solid var(--ink4);border-radius:8px 10px 7px 9px;
+  background:var(--paper);padding:.5rem .75rem;
+  font-family:var(--font-draw);font-size:var(--fs-md);color:var(--ink);
+  outline:none;width:100%;transition:border-color .2s;
+}
+.pf-input:focus{border-color:var(--ink2)}
+.pf-select{
+  border:1.5px solid var(--ink4);border-radius:8px;
+  background:var(--paper);padding:.5rem .65rem;
+  font-family:var(--font-draw);font-size:var(--fs-md);color:var(--ink);
+  outline:none;width:100%;appearance:none;
+}
+
+.profile-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-top:1.25rem;
+}
+.pstat{
+  text-align:center;padding:.7rem;background:var(--cream);
+  border:1.5px solid var(--ink4);border-radius:10px;
+}
+.pstat .ps-num{font-family:var(--font-draw);font-size:calc(1.5rem * var(--fs));font-weight:700;color:var(--ink)}
+.pstat .ps-label{font-family:var(--font-draw);font-size:var(--fs-xs);color:var(--ink3)}
+
+/* ═══════════════════════════════
+   ART EVENTS VIEW
+═══════════════════════════════ */
+.art-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem;
+}
+.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem}
+.event-card{
+  padding:1rem;background:var(--cream);
+  border:2px solid var(--ink4);border-radius:12px 14px 11px 13px;
+  box-shadow:3px 3px 0 var(--ink4);transition:all .3s;
+}
+.event-card:hover{transform:translateY(-3px);box-shadow:4px 6px 0 var(--ink4)}
+.ec-cat{
+  display:inline-block;font-family:var(--font-draw);font-size:var(--fs-xs);
+  letter-spacing:.1em;padding:.15rem .55rem;border-radius:20px;
+  margin-bottom:.5rem;background:var(--paper2);color:var(--ink2);
+}
+.ec-emoji{display:flex;align-items:center;justify-content:center;margin-bottom:.5rem;min-height:36px}
+.ec-title{font-family:var(--font-draw);font-size:var(--fs-base);font-weight:700;margin-bottom:.3rem}
+.ec-date{font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--red);margin-bottom:.25rem}
+.ec-loc{font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3);margin-bottom:.45rem}
+.ec-desc{font-size:var(--fs-sm);line-height:1.75;color:var(--ink2)}
+.ec-go{
+  display:inline-block;margin-top:.6rem;background:none;
+  border:1.5px solid var(--ink4);border-radius:20px;
+  font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3);
+  padding:.25rem .8rem;transition:all .25s;
+}
+.ec-go:hover{border-color:var(--ink2);color:var(--ink);background:var(--paper2)}
+
+/* ═══════════════════════════════
+   OVERLAY / MODALS
+═══════════════════════════════ */
+.overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(45,40,32,.45);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;padding:1rem;
+}
+.overlay.open{opacity:1;pointer-events:all}
+.mbox{
+  background:var(--paper);border:2px solid var(--ink4);border-radius:16px 18px 15px 17px;
+  width:min(500px,100%);max-height:88vh;overflow-y:auto;
+  padding:1.5rem;
+  box-shadow:6px 6px 0 var(--ink4);
+  transform:translateY(16px);transition:transform .35s ease;
+}
+.overlay.open .mbox{transform:translateY(0)}
+.m-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.m-title{font-family:var(--font-draw);font-size:var(--fs-xl);font-weight:700}
+.m-close{
+  background:none;border:1.5px solid var(--ink4);border-radius:50%;
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  font-size:var(--fs-sm);color:var(--ink3);transition:all .2s;
+}
+.m-close:hover{background:var(--paper2);color:var(--ink)}
+
+.mlabel{font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3);margin-bottom:.45rem}
+.mood-row{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.mood-btn{
+  background:var(--paper2);border:1.5px solid transparent;border-radius:20px;
+  padding:.3rem .65rem;font-size:var(--fs-md);transition:all .2s;
+}
+.mood-btn.on{border-color:var(--ink2);background:var(--cream);box-shadow:1px 1px 0 var(--ink4)}
+
+.mtabs{display:flex;border-bottom:2px solid var(--ink4);margin-bottom:1.2rem;gap:.2rem}
+.mtab{
+  background:none;border:none;border-bottom:2.5px solid transparent;
+  margin-bottom:-2px;
+  font-family:var(--font-draw);font-size:var(--fs-md);color:var(--ink3);
+  padding:.5rem 1rem;transition:all .25s;
+}
+.mtab.on{color:var(--ink);border-bottom-color:var(--ink)}
+
+.isec{margin-bottom:1.1rem}
+.isec-h{
+  font-family:var(--font-draw);font-size:var(--fs-md);font-weight:700;
+  color:var(--ink2);margin-bottom:.35rem;display:flex;align-items:center;gap:.35rem;
+}
+.isec-b{font-size:var(--fs-sm);line-height:1.85;color:var(--ink2)}
+
+.m-note{
+  width:100%;min-height:75px;resize:none;
+  background:var(--paper);border:1.5px solid var(--ink4);border-radius:10px;
+  padding:.65rem .85rem;font-family:var(--font-draw);font-size:var(--fs-md);
+  line-height:1.9;color:var(--ink);outline:none;
+  transition:border-color .2s;margin-bottom:1rem;
+}
+.m-note:focus{border-color:var(--ink2)}
+
+.ctools{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.4rem}
+.cdot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:transform .2s}
+.cdot.on{border-color:var(--ink);transform:scale(1.15)}
+.szslider{width:60px;accent-color:var(--ink)}
+.tbtn{
+  background:none;border:1.5px solid var(--ink4);border-radius:6px;
+  padding:.18rem .55rem;font-family:var(--font-draw);font-size:var(--fs-xs);color:var(--ink3);
+  transition:all .2s;
+}
+.tbtn:hover,.tbtn.on{background:var(--paper2);color:var(--ink)}
+
+#dcanvas{
+  width:100%;height:165px;border:1.5px solid var(--ink4);border-radius:10px;
+  cursor:crosshair;touch-action:none;background:#fff;display:block;margin-bottom:1.2rem;
+}
+
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-bottom:.7rem}
+.pthumb{
+  aspect-ratio:1;border-radius:8px;overflow:hidden;
+  background:var(--paper2);border:1.5px solid var(--ink4);
+  display:flex;align-items:center;justify-content:center;font-size:1.5rem;
+}
+.pthumb img{width:100%;height:100%;object-fit:cover}
+.pup-label{
+  display:block;width:100%;background:none;
+  border:1.5px dashed var(--ink4);border-radius:8px;
+  cursor:pointer;padding:.7rem;text-align:center;
+  font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3);transition:all .25s;
+}
+.pup-label:hover{border-color:var(--ink2);color:var(--ink)}
+
+/* ── Badge Unlock notification ── */
+#badge-notif{
+  position:fixed;top:-130px;left:50%;transform:translateX(-50%);
+  z-index:400;background:var(--cream);border:2.5px solid var(--gold);
+  border-radius:14px;padding:.85rem 1.4rem;display:flex;align-items:center;gap:.7rem;
+  box-shadow:4px 4px 0 rgba(200,146,42,.35);
+  font-family:var(--font-draw);font-size:var(--fs-base);
+  transition:top .5s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap;
+}
+#badge-notif.show{top:4.5rem}
+
+/* Misc */
+.hide{display:none!important}
+.flex-row{display:flex;gap:.6rem;align-items:center}
+.text-muted{font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3)}
+
+/* ── HISTORY TIMELINE ── */
+.timeline{display:flex;flex-direction:column;gap:1.25rem;padding:.5rem 0;position:relative}
+.timeline::before{content:'';position:absolute;left:19px;top:15px;bottom:15px;width:2px;background:var(--ink4);z-index:0}
+.tl-item{display:flex;gap:1rem;position:relative;z-index:1}
+.tl-icon{width:40px;height:40px;border-radius:50%;background:var(--cream);border:2px solid var(--ink4);display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;box-shadow:2px 3px 0 var(--ink4)}
+.tl-content{background:var(--cream);border:1.5px solid var(--ink4);border-radius:10px 12px 9px 11px;padding:.7rem .9rem;flex:1;box-shadow:2px 3px 0 var(--ink4)}
+.tl-time{font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3);margin-bottom:.3rem;letter-spacing:.05em}
+.tl-desc{font-family:var(--font-draw);font-size:var(--fs-md);color:var(--ink);line-height:1.5}
+
+/* ─── SVG ICON SYSTEM ─── */
+.ico{display:inline-block;vertical-align:-4px;flex-shrink:0;pointer-events:none}
+.ico-sm{display:inline-block;vertical-align:-3px;flex-shrink:0;pointer-events:none}
+/* ensure sec-title icons align */
+.sec-title .ico,.sec-title .ico-sm{vertical-align:-2px}
+</style>
+<script>
+  // 即時載入字體大小設定以避免畫面閃爍
+  try {
+    const s = JSON.parse(localStorage.getItem('bs2_state'));
+    if(s && s.profile && s.profile.fontSize) {
+      document.documentElement.style.setProperty('--fs', s.profile.fontSize);
+    }
+  } catch(e){}
+</script>
+</head>
+<body>
+
+<!-- ── Hidden SVG Defs ── -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <filter id="rough">
+    <feTurbulence type="turbulence" baseFrequency="0.018" numOctaves="3" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8"/>
+  </filter>
+</svg>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="header-row1">
+    <div class="logo"><svg class="ico" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="11" cy="15.5" rx="5.5" ry="4"/><circle cx="5" cy="8.5" r="2.5"/><circle cx="9" cy="6.5" r="2.5"/><circle cx="13" cy="6.5" r="2.5"/><circle cx="17" cy="8.5" r="2.5"/></svg> 毛球手帳 <span>MaoBall</span></div>
+    <button class="nav-toggle" onclick="toggleNav(this)" title="收起／展開功能欄">▲ 收起</button>
+  </div>
+  <nav class="tab-nav" id="tab-nav">
+    <button class="tab-btn active" onclick="gotoTab('cal',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="14" height="13" rx="2"/><line x1="6" y1="1.5" x2="6" y2="4.5"/><line x1="12" y1="1.5" x2="12" y2="4.5"/><line x1="2" y1="7" x2="16" y2="7"/><circle cx="6" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="11" r="1" fill="currentColor" stroke="none"/></svg> 月曆</button>
+    <button class="tab-btn" onclick="gotoTab('todo',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2.5,5.5 5,8 8.5,3.5"/><line x1="11" y1="5.5" x2="16" y2="5.5"/><line x1="2.5" y1="11" x2="16" y2="11"/><line x1="2.5" y1="15.5" x2="13" y2="15.5"/></svg> 計畫</button>
+    <button class="tab-btn" onclick="gotoTab('travel',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9,2 L2.5,16 L9,13.5 L15.5,16 Z"/><line x1="9" y1="2" x2="9" y2="13.5"/><line x1="3.5" y1="11.5" x2="14.5" y2="11.5"/></svg> 旅遊</button>
+    <button class="tab-btn" onclick="gotoTab('game',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="8" rx="3.5"/><line x1="6.5" y1="8.5" x2="6.5" y2="12.5"/><line x1="4.5" y1="10.5" x2="8.5" y2="10.5"/><circle cx="13" cy="9.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="13" cy="12.5" r="1.1" fill="currentColor" stroke="none"/></svg> 遊戲室</button>
+    <button class="tab-btn" onclick="gotoTab('profile',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6.5" r="3.5"/><path d="M2,17 C2,12 16,12 16,17"/></svg> 我的</button>
+    <button class="tab-btn" onclick="gotoTab('art',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9,2.5 C5.5,2.5 2.5,5.5 2.5,9 C2.5,12.5 5.4,15.5 9,15.5 C10,15.5 10.8,14.7 10.8,13.8 C10.8,13.4 10.6,13 10.6,12.6 C10.6,11.8 11.2,11.2 12,11.2 L13.6,11.2 C15.2,11.2 15.5,10 15.5,9 C15.5,5.5 12.5,2.5 9,2.5"/><circle cx="5.8" cy="7.5" r="1.2" fill="#C8503A" stroke="none"/><circle cx="8.5" cy="5.5" r="1.2" fill="#6A9E6E" stroke="none"/><circle cx="11.5" cy="6.5" r="1.2" fill="#5A8FAE" stroke="none"/></svg> 藝文</button>
+    <button class="tab-btn" onclick="gotoTab('history',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="6"/><polyline points="9,5 9,9 11.5,11.5"/></svg> 歷程</button>
+  </nav>
+</header>
+
+<!-- ══════════════════════════════════
+     1. CALENDAR VIEW
+══════════════════════════════════ -->
+<div class="view active" id="cal-view">
+  <div class="cal-wrap">
+    <!-- Main Calendar (primary, centered) -->
+    <div class="hcard">
+      <div class="cal-nav" style="position:relative">
+        <button class="cal-arrow" onclick="chMonth(-1)">‹</button>
+        <div class="cal-title" id="cal-title" onclick="togglePicker()"></div>
+        <div id="cal-picker">
+          <div class="cp-year-row">
+            <button class="cp-arr" onclick="chPickerYear(-1)">‹</button>
+            <div class="cp-year" id="cp-year-lbl"></div>
+            <button class="cp-arr" onclick="chPickerYear(1)">›</button>
+          </div>
+          <div class="cp-months" id="cp-months"></div>
+        </div>
+        <button class="cal-arrow" onclick="chMonth(1)">›</button>
+      </div>
+      <div class="cal-wdays" id="cal-wdays"></div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <!-- Secondary panels below -->
+    <div class="cal-bottom">
+      <div class="hcard" style="font-size:.9em">
+        <div class="sec-title" style="font-size:1rem;margin-bottom:.7rem"><svg class="ico-sm" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/><line x1="1.5" y1="6" x2="14.5" y2="6"/><circle cx="5" cy="9.5" r=".9" fill="#C8503A" stroke="none"/><circle cx="8" cy="9.5" r=".9" fill="#C8922A" stroke="none"/><circle cx="11" cy="9.5" r=".9" fill="#6A9E6E" stroke="none"/></svg> 近期節日</div>
+        <div class="holiday-list" id="holiday-list"></div>
+      </div>
+      <div class="hcard" style="font-size:.9em">
+        <div class="sec-title" style="font-size:1rem;margin-bottom:.7rem"><svg class="ico-sm" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="11"/><line x1="5" y1="8" x2="11" y2="8"/></svg> 自訂節日</div>
+        <div class="add-h-form">
+          <input type="text" id="h-name" placeholder="節日名稱" maxlength="15">
+          <input type="date" id="h-date">
+          <button class="ink-btn" style="font-size:.85rem" onclick="addCustomHoliday()"><svg class="ico-sm" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="5.5"/><line x1="6.5" y1="4" x2="6.5" y2="9"/><line x1="4" y1="6.5" x2="9" y2="6.5"/></svg> 新增</button>
+        </div>
+        <div style="margin-top:.7rem" id="custom-h-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     2. TODO VIEW
+══════════════════════════════════ -->
+<div class="view" id="todo-view">
+  <div class="sec-title"><svg class="ico-sm" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2.5,5.5 5,8 8.5,3.5"/><line x1="11" y1="5.5" x2="16" y2="5.5"/><line x1="2.5" y1="11" x2="16" y2="11"/><line x1="2.5" y1="15.5" x2="13" y2="15.5"/></svg> 今日計畫清單</div>
+  <div class="hcard">
+    <div class="todo-add">
+      <input type="text" id="todo-input" placeholder="新增一項計畫…" onkeydown="if(event.key==='Enter')addTodo()">
+      <button class="ink-btn" onclick="addTodo()">新增</button>
+    </div>
+    <!-- Eisenhower Matrix quadrant selector -->
+    <div class="eis-row" id="eis-row">
+      <span style="font-family:var(--font-draw);font-size:.78rem;color:var(--ink3);align-self:center">優先級：</span>
+      <button class="eis-btn sel" data-q="1" onclick="selQ(1,this)"><svg class="ico-sm" width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="#C8503A"/></svg> 緊急重要</button>
+      <button class="eis-btn" data-q="2" onclick="selQ(2,this)"><svg class="ico-sm" width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="#6A9E6E"/></svg> 重要不急</button>
+      <button class="eis-btn" data-q="3" onclick="selQ(3,this)"><svg class="ico-sm" width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="#C8922A"/></svg> 緊急不重</button>
+      <button class="eis-btn" data-q="4" onclick="selQ(4,this)"><svg class="ico-sm" width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="#A89880"/></svg> 彈性處理</button>
+    </div>
+    <div class="todo-list" id="todo-list">
+      <div class="text-muted" style="text-align:center;padding:1rem">還沒有計畫，加入第一項吧 ✏️</div>
+    </div>
+    <div class="sketch-line"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+      <div class="text-muted" id="todo-progress">0 / 0 完成</div>
+      <button class="ghost-btn" onclick="clearDoneTodos()">清除已完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     3. TRAVEL VIEW
+══════════════════════════════════ -->
+<div class="view" id="travel-view">
+  <div class="travel-header">
+    <div class="t-title"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12,2.5 L3.5,21 L12,18 L20.5,21 Z"/><line x1="12" y1="2.5" x2="12" y2="18"/><line x1="4.5" y1="15" x2="19.5" y2="15"/></svg> 世界必去景點</div>
+    <div class="t-sub">MUST-VISIT DESTINATIONS</div>
+  </div>
+  <!-- Mascot -->
+  <div id="mascot">
+    <div class="m-bubble" id="mspeech">嗨！我是小旅 🧭<br>點擊景點，我來介紹！</div>
+    <!-- CUTE MASCOT SVG -->
+    <svg class="mascot-svg" width="110" height="130" viewBox="0 0 110 130" xmlns="http://www.w3.org/2000/svg">
+      <!-- Backpack -->
+      <rect x="34" y="75" width="20" height="26" rx="5" ry="7" fill="#7BAE7F" stroke="#5A8E5E" stroke-width="1.5"/>
+      <rect x="38" y="80" width="12" height="8" rx="3" fill="#5A8E5E"/>
+      <line x1="44" y1="75" x2="44" y2="70" stroke="#5A8E5E" stroke-width="2" stroke-linecap="round"/>
+      <!-- Body -->
+      <ellipse cx="54" cy="88" rx="19" ry="18" fill="#FCEBD8" stroke="#D4A070" stroke-width="1.8"/>
+      <!-- Scarf -->
+      <path d="M36,78 Q54,72 72,78 Q70,85 54,82 Q38,85 36,78 Z" fill="#E87878" stroke="#C85858" stroke-width="1.2"/>
+      <path d="M36,80 Q32,86 30,95" stroke="#E87878" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- Left arm holding map -->
+      <path d="M36,84 Q24,90 22,98" stroke="#FCEBD8" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <line x1="35" y1="86" x2="23" y2="98" stroke="#D4A070" stroke-width="1.5"/>
+      <!-- Map -->
+      <rect x="10" y="93" width="22" height="18" rx="3" fill="#FFF5E0" stroke="#C8B090" stroke-width="1.5"/>
+      <line x1="13" y1="99" x2="29" y2="99" stroke="#C8B090" stroke-width="1"/>
+      <line x1="13" y1="103" x2="25" y2="103" stroke="#C8B090" stroke-width="1"/>
+      <circle cx="20" cy="99" r="2.5" fill="#E87878" opacity=".7"/>
+      <!-- Right arm waving -->
+      <path d="M72,84 Q86,78 88,70" stroke="#FCEBD8" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <line x1="71" y1="86" x2="87" y2="70" stroke="#D4A070" stroke-width="1.5"/>
+      <!-- Paw R -->
+      <circle cx="88" cy="69" r="6" fill="#FCEBD8" stroke="#D4A070" stroke-width="1.5"/>
+      <circle cx="85.5" cy="66.5" r="2" fill="#FFB7C5" opacity=".8"/>
+      <circle cx="90.5" cy="66.5" r="2" fill="#FFB7C5" opacity=".8"/>
+      <!-- Legs -->
+      <ellipse cx="43" cy="104" rx="8" ry="5" fill="#FCEBD8" stroke="#D4A070" stroke-width="1.5"/>
+      <ellipse cx="64" cy="104" rx="8" ry="5" fill="#FCEBD8" stroke="#D4A070" stroke-width="1.5"/>
+      <!-- Head -->
+      <ellipse cx="54" cy="46" rx="28" ry="27" fill="#FCEBD8" stroke="#D4A070" stroke-width="1.8"/>
+      <!-- Hat -->
+      <ellipse cx="54" cy="22" rx="24" ry="5" fill="#6B7FAE" stroke="#4B5F8E" stroke-width="1.5"/>
+      <rect x="42" y="10" width="24" height="13" rx="4" fill="#6B7FAE" stroke="#4B5F8E" stroke-width="1.5"/>
+      <rect x="44" y="18" width="20" height="4" rx="2" fill="#5B6F9E"/>
+      <!-- Left ear -->
+      <polygon points="28,24 22,6 38,20" fill="#FCEBD8" stroke="#D4A070" stroke-width="1.6"/>
+      <polygon points="28,22 25,10 36,20" fill="#FFB7C5"/>
+      <!-- Right ear -->
+      <polygon points="80,24 88,6 72,20" fill="#FCEBD8" stroke="#D4A070" stroke-width="1.6"/>
+      <polygon points="80,22 85,10 74,20" fill="#FFB7C5"/>
+      <!-- Eyes (big sparkly) -->
+      <circle cx="40" cy="45" r="7" fill="#2D2820"/>
+      <circle cx="68" cy="45" r="7" fill="#2D2820"/>
+      <circle cx="42" cy="42" r="3" fill="white"/>
+      <circle cx="70" cy="42" r="3" fill="white"/>
+      <circle cx="38" cy="46" r="1.5" fill="white"/>
+      <circle cx="66" cy="46" r="1.5" fill="white"/>
+      <!-- Nose -->
+      <ellipse cx="54" cy="55" rx="4" ry="2.8" fill="#FF9DB5"/>
+      <!-- Mouth -->
+      <path d="M46,60 Q54,67 62,60" stroke="#D4A070" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <!-- Blush -->
+      <ellipse cx="24" cy="52" rx="6" ry="3.5" fill="#FFB7C5" opacity=".5"/>
+      <ellipse cx="84" cy="52" rx="6" ry="3.5" fill="#FFB7C5" opacity=".5"/>
+      <!-- Whiskers L -->
+      <line x1="5" y1="52" x2="26" y2="54" stroke="#D4A070" stroke-width=".9" opacity=".6"/>
+      <line x1="5" y1="57" x2="26" y2="57" stroke="#D4A070" stroke-width=".9" opacity=".6"/>
+      <line x1="5" y1="62" x2="26" y2="59" stroke="#D4A070" stroke-width=".9" opacity=".6"/>
+      <!-- Whiskers R -->
+      <line x1="103" y1="52" x2="82" y2="54" stroke="#D4A070" stroke-width=".9" opacity=".6"/>
+      <line x1="103" y1="57" x2="82" y2="57" stroke="#D4A070" stroke-width=".9" opacity=".6"/>
+      <line x1="103" y1="62" x2="82" y2="59" stroke="#D4A070" stroke-width=".9" opacity=".6"/>
+      <!-- Tail -->
+      <path d="M72,98 Q90,88 86,70" stroke="#D4A070" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <!-- Country tabs -->
+  <div class="ctabs" id="ctabs"></div>
+  <!-- Spots grid -->
+  <div class="sgrid" id="sgrid"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     4. GAME ROOM VIEW
+══════════════════════════════════ -->
+<div class="view" id="game-view">
+  <div class="sec-title"><svg class="ico-sm" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7" width="15" height="9" rx="4"/><line x1="7" y1="9" x2="7" y2="14"/><line x1="4.5" y1="11.5" x2="9.5" y2="11.5"/><circle cx="14" cy="10" r="1.2" fill="currentColor" stroke="none"/><circle cx="14" cy="13.5" r="1.2" fill="currentColor" stroke="none"/></svg> 遊戲室</div>
+  <!-- Diamond Bar -->
+  <div class="diamonds-bar">
+    <div class="d-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11,2 19,11 11,20 3,11"/><line x1="3" y1="11" x2="19" y2="11"/><line x1="6.5" y1="6" x2="15.5" y2="6"/></svg></div>
+    <div class="d-count" id="d-count">0</div>
+    <div class="d-label">顆鑽石</div>
+    <div style="margin-left:auto;font-family:var(--font-draw);font-size:.82rem;color:var(--ink3)">完成挑戰來收集！</div>
+  </div>
+
+  <div class="sec-title" style="font-size:1.1rem"><svg class="ico-sm" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="1" x2="8" y2="4"/><line x1="8" y1="12" x2="8" y2="15"/><line x1="1" y1="8" x2="4" y2="8"/><line x1="12" y1="8" x2="15" y2="8"/><line x1="3.1" y1="3.1" x2="5.2" y2="5.2"/><line x1="10.8" y1="10.8" x2="12.9" y2="12.9"/><line x1="12.9" y1="3.1" x2="10.8" y2="5.2"/><line x1="5.2" y1="10.8" x2="3.1" y2="12.9"/><circle cx="8" cy="8" r="2.5"/></svg> 每日挑戰</div>
+  <div class="challenges-grid" id="challenges-grid"></div>
+
+  <div class="sec-title" style="font-size:1.1rem;margin-top:1rem"><svg class="ico-sm" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4,2 L12,2 L12,8.5 C12,11 4,11 4,8.5 Z"/><path d="M2,2 L4,2 C4,5 2,5.5 2,3.5 Z"/><path d="M14,2 L12,2 C12,5 14,5.5 14,3.5 Z"/><line x1="8" y1="11" x2="8" y2="13"/><line x1="5" y1="13" x2="11" y2="13"/></svg> 徽章收藏</div>
+  <div class="text-muted" style="margin-bottom:.85rem">收集足夠鑽石即可兌換徽章！</div>
+  <div class="badges-grid" id="badges-grid"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     5. PROFILE VIEW
+══════════════════════════════════ -->
+<div class="view" id="profile-view">
+  <div class="sec-title"><svg class="ico-sm" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="4"/><path d="M2,18 C2,13 18,13 18,18"/></svg> 我的個人檔案</div>
+  <div class="hcard" style="margin-bottom:1.25rem">
+    <div class="profile-wrap">
+      <div class="profile-avatar">
+        <div class="avatar-ring" id="avatar-display">🐱</div>
+        <div style="display:flex;gap:.3rem;flex-wrap:wrap;justify-content:center">
+          <span onclick="setAvatar('🐱')" style="cursor:pointer;font-size:1.3rem">🐱</span>
+          <span onclick="setAvatar('🦊')" style="cursor:pointer;font-size:1.3rem">🦊</span>
+          <span onclick="setAvatar('🐼')" style="cursor:pointer;font-size:1.3rem">🐼</span>
+          <span onclick="setAvatar('🐨')" style="cursor:pointer;font-size:1.3rem">🐨</span>
+          <span onclick="setAvatar('🦁')" style="cursor:pointer;font-size:1.3rem">🦁</span>
+          <span onclick="setAvatar('🐸')" style="cursor:pointer;font-size:1.3rem">🐸</span>
+        </div>
+      </div>
+      <div class="profile-form" id="profile-form">
+        <div class="pf-group"><div class="pf-label">名字</div><input class="pf-input" id="pf-name" placeholder="你的名字"></div>
+        <div class="pf-group"><div class="pf-label">綽號 / 暱稱</div><input class="pf-input" id="pf-nick" placeholder="大家怎麼叫你？"></div>
+        <div class="pf-group"><div class="pf-label">生日</div><input class="pf-input" type="date" id="pf-birthday"></div>
+        <div class="pf-group">
+          <div class="pf-label">血型</div>
+          <select class="pf-select" id="pf-blood">
+            <option value="">選擇血型</option>
+            <option>A 型</option><option>B 型</option><option>O 型</option><option>AB 型</option>
+          </select>
+        </div>
+        <div class="pf-group">
+          <div class="pf-label">星座</div>
+          <select class="pf-select" id="pf-zodiac">
+            <option value="">選擇星座</option>
+            <option>牡羊座 ♈</option><option>金牛座 ♉</option><option>雙子座 ♊</option>
+            <option>巨蟹座 ♋</option><option>獅子座 ♌</option><option>處女座 ♍</option>
+            <option>天秤座 ♎</option><option>天蠍座 ♏</option><option>射手座 ♐</option>
+            <option>摩羯座 ♑</option><option>水瓶座 ♒</option><option>雙魚座 ♓</option>
+          </select>
+        </div>
+        <div class="pf-group">
+          <div class="pf-label">個性標籤</div>
+          <input class="pf-input" id="pf-persona" placeholder="例如：INFJ、宅宅、話癆">
+        </div>
+        <div class="pf-group full"><div class="pf-label">興趣與愛好</div><input class="pf-input" id="pf-hobby" placeholder="閱讀、旅行、烘焙、打電動…"></div>
+        <div class="pf-group full"><div class="pf-label">座右銘</div><input class="pf-input" id="pf-motto" placeholder="你的人生信條是…"></div>
+        <div class="pf-group full"><div class="pf-label">夢想清單 ✨</div><textarea class="pf-input" id="pf-dream" rows="2" placeholder="這輩子一定要做的事…"></textarea></div>
+        <div class="pf-group full"><div class="pf-label">最近心情</div><input class="pf-input" id="pf-mood" placeholder="用一句話描述最近的狀態"></div>
+        <div class="pf-group full">
+          <div class="pf-label">介面字體大小</div>
+          <div style="display:flex;gap:.8rem;align-items:center;padding:0 .5rem">
+            <span style="font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3)">小</span>
+            <input type="range" id="pf-fontsize" min="0.85" max="1.3" step="0.05" value="1" style="flex:1;accent-color:var(--ink)">
+            <span style="font-family:var(--font-draw);font-size:calc(1.2rem * var(--fs));color:var(--ink3)">大</span>
+          </div>
+        </div>
+        <div class="pf-group full">
+          <div class="pf-label">帳號與資料同步</div>
+          <div id="cloud-status" style="font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink);padding:.6rem;background:var(--paper2);border-radius:8px;border:1.5px solid var(--ink4);text-align:center;line-height:1.4">
+            ⏳ 雲端連線驗證中...
+          </div>
+          <div style="font-size:var(--fs-xs);color:var(--ink3);margin-top:.3rem;text-align:center">系統會自動登入並將您的手帳資料安全備份至雲端。</div>
+        </div>
+        <div class="pf-group full" style="align-items:flex-start">
+          <button class="ink-btn" onclick="saveProfile()" style="width:100%"><svg class="ico-sm" width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12,13.5 L3,13.5 C2.4,13.5 2,13.1 2,12.5 L2,2.5 C2,1.9 2.4,1.5 3,1.5 L10.5,1.5 L13,4 L13,12.5 C13,13.1 12.6,13.5 12,13.5 Z"/><rect x="4.5" y="1.5" width="5" height="3" rx=".5"/><rect x="4" y="8.5" width="7" height="4" rx="1"/></svg> 儲存檔案</button>
+        </div>
+        <div class="pf-group full" style="align-items:flex-start;margin-top:.25rem">
+          <button onclick="resetApp()" style="width:100%;background:none;border:1.5px dashed #C8503A;border-radius:8px 10px 7px 9px;padding:.48rem;font-family:var(--font-draw);font-size:.88rem;color:#C8503A;cursor:pointer;transition:all .2s"><svg class="ico-sm" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12,7 C12,9.8 9.8,12 7,12 C4.2,12 2,9.8 2,7 C2,4.2 4.2,2 7,2 C8.8,2 10.3,2.9 11.2,4.2"/><polyline points="11,1.5 11.5,4.5 8.5,4.5"/></svg> 重置所有資料，從零開始</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="profile-stats" id="profile-stats">
+    <div class="pstat"><div class="ps-num" id="st-cal">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1.5" width="10" height="9" rx="1.5"/><line x1="4" y1=".5" x2="4" y2="3"/><line x1="8" y1=".5" x2="8" y2="3"/><line x1="1" y1="4.5" x2="11" y2="4.5"/></svg> 日記天數</div></div>
+    <div class="pstat"><div class="ps-num" id="st-gems">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,1 11,6 6,11 1,6"/><line x1="1" y1="6" x2="11" y2="6"/><line x1="3" y1="3.5" x2="9" y2="3.5"/></svg> 鑽石總量</div></div>
+    <div class="pstat"><div class="ps-num" id="st-badge">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3,1 L9,1 L9,6.5 C9,8.5 3,8.5 3,6.5 Z"/><line x1="6" y1="8.5" x2="6" y2="10"/><line x1="3.5" y1="10" x2="8.5" y2="10"/></svg> 徽章數量</div></div>
+    <div class="pstat"><div class="ps-num" id="st-spot">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6,1 L1.5,11 L6,9 L10.5,11 Z"/><line x1="6" y1="1" x2="6" y2="9"/><line x1="2.5" y1="7.5" x2="9.5" y2="7.5"/></svg> 拜訪景點</div></div>
+    <div class="pstat"><div class="ps-num" id="st-todo">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,4 3.5,6 7,2"/><line x1="9" y1="4" x2="11" y2="4"/><line x1="1.5" y1="8.5" x2="11" y2="8.5"/></svg> 完成計畫</div></div>
+    <div class="pstat"><div class="ps-num" id="st-days">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="5"/><polyline points="6,3 6,6 8.5,7.5"/></svg> 使用天數</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     6. ART EVENTS VIEW
+══════════════════════════════════ -->
+<div class="view" id="art-view">
+  <div class="art-header">
+    <div>
+      <div class="sec-title"><svg class="ico-sm" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10,3 C6,3 3,6.2 3,10 C3,13.9 6,17 10,17 C11,17 11.8,16.2 11.8,15.3 C11.8,14.9 11.6,14.5 11.6,14 C11.6,13.1 12.3,12.4 13.2,12.4 L14.9,12.4 C16.6,12.4 17,11.1 17,10 C17,6.1 13.9,3 10,3"/><circle cx="6.5" cy="8" r="1.3" fill="#C8503A" stroke="none"/><circle cx="9.5" cy="5.8" r="1.3" fill="#6A9E6E" stroke="none"/><circle cx="13" cy="7.2" r="1.3" fill="#5A8FAE" stroke="none"/></svg> 台灣藝文活動</div>
+      <div class="text-muted">精選近期藝文活動，出去走走吧！</div>
+    </div>
+    <div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem" id="art-filter"></div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap" id="region-filter"></div>
+    </div>
+  </div>
+  <div class="events-grid" id="events-grid"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     7. HISTORY VIEW
+══════════════════════════════════ -->
+<div class="view" id="history-view">
+  <div class="sec-title"><svg class="ico-sm" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><polyline points="10,6 10,10 13,12"/></svg> 操作歷程記錄</div>
+  <div class="text-muted" style="margin-bottom:1.5rem">記錄你在手帳裡留下的每一個點滴 ✨（最多保留最近 100 筆）</div>
+  <div class="timeline" id="history-list"></div>
+</div>
+
+<!-- ═════════════════
+     MODALS
+═════════════════ -->
+<!-- Day Modal -->
+<div class="overlay" id="day-modal">
+  <div class="mbox">
+    <div class="m-top">
+      <div class="m-title" id="dmt"></div>
+      <button class="m-close" onclick="closeM('day-modal')">✕</button>
+    </div>
+    <div class="mlabel"><svg class="ico-sm" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5,1 C4,1 2,3 2,5.5 C2,8 4,10 6.5,10 C7.2,10 7.8,9.5 7.8,8.8 C7.8,8.5 7.7,8.2 7.7,7.9 C7.7,7.3 8.2,6.8 8.8,6.8 L10,6.8 C11.1,6.8 11.3,6 11.3,5.5 C11.3,3 9.2,1 6.5,1"/><circle cx="4.5" cy="4.8" r=".9" fill="#C8503A" stroke="none"/><circle cx="6.3" cy="3.3" r=".9" fill="#C8922A" stroke="none"/><circle cx="8.5" cy="4.2" r=".9" fill="#5A8FAE" stroke="none"/></svg> 今天的心情</div>
+    <div class="mood-row" id="d-mood-row"></div>
+    <div class="mlabel"><svg class="ico-sm" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2,10 L4,8 L10,2 Q11,1 12,2 Q13,3 12,4 L6,10 Z" fill="rgba(90,143,174,.12)"/><line x1="2" y1="10" x2="11" y2="10"/></svg> 塗鴉一下</div>
+    <div class="ctools">
+      <div class="cdot on" style="background:#2D2820" onclick="setPen('#2D2820',this)"></div>
+      <div class="cdot" style="background:#C8503A" onclick="setPen('#C8503A',this)"></div>
+      <div class="cdot" style="background:#6A9E6E" onclick="setPen('#6A9E6E',this)"></div>
+      <div class="cdot" style="background:#5A8FAE" onclick="setPen('#5A8FAE',this)"></div>
+      <div class="cdot" style="background:#C8922A" onclick="setPen('#C8922A',this)"></div>
+      <div class="cdot" style="background:#D87890" onclick="setPen('#D87890',this)"></div>
+      <div class="cdot" style="background:#8A78B8" onclick="setPen('#8A78B8',this)"></div>
+      <input type="range" class="szslider" id="bsize" min="1" max="20" value="3">
+      <button class="tbtn" id="eraser-btn" onclick="toggleEraser()"><svg class="ico-sm" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2,10 L5.5,6.5 L9.5,10.5 L6,10.5 Z" fill="rgba(200,188,170,.4)"/><line x1="4" y1="8" x2="8" y2="4"/><line x1="2" y1="11.5" x2="11" y2="11.5"/></svg> 橡皮</button>
+      <button class="tbtn" onclick="clearCvs()"><svg class="ico-sm" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="2.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="2.5" x2="2.5" y2="10.5"/></svg> 清除</button>
+    </div>
+    <canvas id="dcanvas" width="440" height="165"></canvas>
+    <div class="mlabel"><svg class="ico-sm" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5,11 L2,11.5 L2.5,11 L8.5,5 Q10,3.5 11,4.5 Q12,5.5 10.5,7 L4.5,13 L1.5,13 L1.5,10 Z"/><line x1="7.5" y1="6" x2="9.5" y2="8"/></svg> 日記</div>
+    <textarea class="m-note" id="dnote" placeholder="寫下此刻的心情…"></textarea>
+    <button class="ink-btn" style="width:100%" onclick="saveDay()">留住這一天</button>
+  </div>
+</div>
+
+<!-- Spot Modal -->
+<div class="overlay" id="spot-modal">
+  <div class="mbox">
+    <div class="m-top">
+      <div class="m-title" id="smt"></div>
+      <button class="m-close" onclick="closeM('spot-modal')">✕</button>
+    </div>
+    <div id="simg" style="height:130px;border-radius:12px;margin-bottom:1rem;overflow:hidden"></div>
+    <div class="mtabs">
+      <button class="mtab on" onclick="stab('info',this)"><svg class="ico-sm" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="1,2 5,3.5 9,2 13,3.5 13,12 9,10.5 5,12 1,10.5"/><line x1="5" y1="3.5" x2="5" y2="12"/><line x1="9" y1="2" x2="9" y2="10.5"/></svg> 景點介紹</button>
+      <button class="mtab" onclick="stab('trip',this)"><svg class="ico-sm" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><circle cx="7" cy="7" r="2.5"/><circle cx="10.5" cy="4" r="1" fill="currentColor" stroke="none"/></svg> 我去過了</button>
+    </div>
+    <div id="tab-info">
+      <div class="isec"><div class="isec-h"><svg class="ico-sm" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><line x1="7" y1="4.5" x2="7" y2="7.5"/><circle cx="7" cy="9.5" r=".8" fill="currentColor" stroke="none"/></svg> 為什麼必去</div><div class="isec-b" id="s-why"></div></div>
+      <div class="isec"><div class="isec-h"><svg class="ico-sm" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polygon points="7,1 8.5,5 13,5.5 9.5,8.5 10.5,13 7,10.5 3.5,13 4.5,8.5 1,5.5 5.5,5"/></svg> 當地特色</div><div class="isec-b" id="s-feat"></div></div>
+      <div class="isec"><div class="isec-h"><svg class="ico-sm" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#C8922A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7,1.5 L8.8,5.5 L13,6 L10,8.8 L10.8,13 L7,10.8 L3.2,13 L4,8.8 L1,6 L5.2,5.5 Z" fill="rgba(200,146,42,.1)"/><line x1="7" y1="4.5" x2="7" y2="7"/><circle cx="7" cy="9" r=".7" fill="#C8922A" stroke="none"/></svg> 注意事項</div><div class="isec-b" id="s-warn"></div></div>
+      <div class="isec"><div class="isec-h"><svg class="ico-sm" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4,2 L10,4 L10,12 L4,10 Z"/><path d="M10,4 L13,2 L13,10 L10,12 Z"/><path d="M4,2 L1,4 L1,12 L4,10 Z"/><line x1="4" y1="2" x2="4" y2="10"/><line x1="10" y1="4" x2="10" y2="12"/></svg> 景點地圖</div><div class="isec-b" id="s-map" style="margin-top:.5rem"></div></div>
+    </div>
+    <div id="tab-trip" class="hide">
+      <div class="mlabel"><svg class="ico-sm" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5,1 C4,1 2,3 2,5.5 C2,8 4,10 6.5,10 C7.2,10 7.8,9.5 7.8,8.8 C7.8,8.5 7.7,8.2 7.7,7.9 C7.7,7.3 8.2,6.8 8.8,6.8 L10,6.8 C11.1,6.8 11.3,6 11.3,5.5 C11.3,3 9.2,1 6.5,1"/><circle cx="4.5" cy="4.8" r=".9" fill="#D87890" stroke="none"/><circle cx="6.3" cy="3.3" r=".9" fill="#C8922A" stroke="none"/></svg> 旅遊心情</div>
+      <div class="mood-row" id="trip-mood"></div>
+      <div class="mlabel"><svg class="ico-sm" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5,11 L2,11.5 L2.5,11 L8.5,5 Q10,3.5 11,4.5 Q12,5.5 10.5,7 L4.5,13 L1.5,13 L1.5,10 Z"/><line x1="7.5" y1="6" x2="9.5" y2="8"/></svg> 旅遊日記</div>
+      <textarea class="m-note" id="tnote" placeholder="記下這趟旅程…"></textarea>
+      <div class="mlabel"><svg class="ico-sm" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="2" width="11" height="9" rx="1.5"/><circle cx="4.5" cy="6" r="1.5"/><path d="M8,4.5 L12,9"/><line x1="10.5" y1="3" x2="10.5" y2="5"/><line x1="9.5" y1="4" x2="11.5" y2="4"/></svg> 旅遊照片</div>
+      <div class="pgrid" id="pgrid"></div>
+      <label class="pup-label"><svg class="ico-sm" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="6.5" y1="2" x2="6.5" y2="11"/><line x1="2" y1="6.5" x2="11" y2="6.5"/></svg> 上傳照片<input type="file" id="fup" accept="image/*" multiple style="display:none" onchange="uploadPics(event)"></label>
+      <button class="ink-btn" style="width:100%;margin-top:.85rem" onclick="saveTrip()">儲存旅遊紀錄</button>
+    </div>
+  </div>
+</div>
+
+<!-- Animal Celebration Popup -->
+<div id="animal-pop">
+  <div class="a-bubble" id="a-speech"></div>
+  <svg id="a-svg" width="90" height="90" viewBox="0 0 90 90"></svg>
+</div>
+
+<!-- Badge Notification -->
+<div id="badge-notif" role="alert">
+  <svg id="bn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C8922A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6,3 L18,3 L18,12 C18,16 6,16 6,12 Z"/><path d="M3,3 L6,3 C6,8 3,9 3,6 Z"/><path d="M21,3 L18,3 C18,8 21,9 21,6 Z"/><line x1="12" y1="16" x2="12" y2="19"/><line x1="8" y1="19" x2="16" y2="19"/></svg>
+  <div>
+    <div style="font-weight:700" id="bn-title"></div>
+    <div style="font-size:.78rem;color:var(--ink3)" id="bn-sub"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════
+   DATA
+═══════════════════════ */
+const MOODS=['😊','😌','😔','😤','😴','🥰','😂','😰','🤩','😶','🥹','🫠'];
+const WD=['日','一','二','三','四','五','六'];
+const MONTHS=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+
+/* ── HOLIDAYS ── */
+const now=new Date(), CY=now.getFullYear();
+function getMDayOfWeek(yr,m,n,wd){/* nth weekday of month */
+  let d=new Date(yr,m,1),cnt=0;
+  while(d.getMonth()===m){if(d.getDay()===wd){cnt++;if(cnt===n)return d.getDate();}d.setDate(d.getDate()+1);}
+  return 1;
+}
+const HOLIDAYS=[
+  {id:'ny',n:'元旦',emoji:'ny',color:'#C8503A',
+   dates:y=>[{y,m:0,d:1}]},
+  {id:'cny',n:'春節',emoji:'cny',color:'#E07030',
+   dates:y=>({2025:[{y:2025,m:0,d:29}],2026:[{y:2026,m:1,d:17}]}[y]||[])},
+  {id:'val',n:'情人節',emoji:'val',color:'#E87878',
+   dates:y=>[{y,m:1,d:14}]},
+  {id:'wom',n:'婦女節',emoji:'wom',color:'#D87890',
+   dates:y=>[{y,m:2,d:8}]},
+  {id:'fool',n:'愚人節',emoji:'fool',color:'#8A78B8',
+   dates:y=>[{y,m:3,d:1}]},
+  {id:'tomb',n:'清明節',emoji:'tomb',color:'#6B8070',
+   dates:y=>[{y,m:3,d:5}]},
+  {id:'dragon',n:'端午節',emoji:'dragon',color:'#6A9E6E',
+   dates:y=>({2025:[{y:2025,m:4,d:31}],2026:[{y:2026,m:5,d:19}]}[y]||[])},
+  {id:'mom',n:'母親節',emoji:'mom',color:'#D87890',
+   dates:y=>[{y,m:4,d:getMDayOfWeek(y,4,2,0)}]},
+  {id:'dad',n:'父親節',emoji:'dad',color:'#5A8FAE',
+   dates:y=>[{y,m:7,d:8}]},
+  {id:'mooncake',n:'中秋節',emoji:'mooncake',color:'#C8922A',
+   dates:y=>({2025:[{y:2025,m:9,d:6}],2026:[{y:2026,m:8,d:25}]}[y]||[])},
+  {id:'halloween',n:'萬聖節',emoji:'halloween',color:'#B06020',
+   dates:y=>[{y,m:9,d:31}]},
+  {id:'singles',n:'光棍節',emoji:'singles',color:'#8A78B8',
+   dates:y=>[{y,m:10,d:11}]},
+  {id:'xmas',n:'聖誕節',emoji:'xmas',color:'#6A9E6E',
+   dates:y=>[{y,m:11,d:25}]},
+  {id:'nye',n:'跨年夜',emoji:'nye',color:'#C8503A',
+   dates:y=>[{y,m:11,d:31}]},
+];
+
+/* Build holiday map: computed dynamically per year in getHolForDate */
+/* Pre-cache commonly visited years at startup, then extend on demand */
+const H_MAP={};
+function ensureYear(y){
+  if(H_MAP[`__cached_${y}`]) return;
+  HOLIDAYS.forEach(h=>{
+    (h.dates(y)||[]).forEach(dt=>{
+      const k=`${dt.y}-${dt.m}-${dt.d}`;
+      if(!H_MAP[k]) H_MAP[k]=h; // first match wins
+    });
+  });
+  H_MAP[`__cached_${y}`]=true;
+}
+// Pre-cache current ± 5 years so most navigation is instant
+for(let y=CY-5;y<=CY+5;y++) ensureYear(y);
+
+function getHolForDate(yr,mo,day){
+  ensureYear(yr); // ensure standard holidays cached
+  const k=`${yr}-${mo}-${day}`;
+  const std=H_MAP[k]||null;
+  // Also check custom holidays
+  const customs=S.calData.__custom||[];
+  const custom=customs.find(c=>{
+    const cd=new Date(c.date);
+    return cd.getFullYear()===yr&&cd.getMonth()===mo&&cd.getDate()===day;
+  });
+  return custom ? {n:custom.name,color:'#8A78B8',isCustom:true} : std;
+}
+
+/* ── SPOTS ── */
+const COUNTRIES=[
+  {id:'jp',n:'🇯🇵 日本'},{id:'fr',n:'🇫🇷 法國'},{id:'it',n:'🇮🇹 義大利'},
+  {id:'us',n:'🇺🇸 美國'},{id:'gb',n:'🇬🇧 英國'},{id:'th',n:'🇹🇭 泰國'},
+  {id:'is',n:'🇮🇸 冰島'},{id:'au',n:'🇦🇺 澳洲'}
+];
+const SPOTS=[
+  {id:'jp-tokyo',c:'jp',n:'東京',e:'🗼',bk:'#FFE4E1',
+   why:'東京是世界最安全便利的大都市，傳統古寺與現代前衛並存，每個轉角都有驚喜。',
+   feat:'淺草寺、澀谷十字路口、秋葉原、台場、築地市場海鮮早餐、東京鐵塔夜景。',
+   warn:'交通複雜，建議下載Suica App。高峰期地鐵擁擠，部分場所禁止喧嘩。',
+   tip:'淺草寺的御守超靈！澀谷十字路口一定要站在中間感受一下人潮海嘯🗼🌸'},
+  {id:'jp-kyoto',c:'jp',n:'京都',e:'⛩️',bk:'#FFE8EE',
+   why:'1600座寺院、400座神社，日本文化的心臟。四季各有絕景，春櫻秋楓讓人著迷。',
+   feat:'伏見稻荷千本鳥居、嵐山竹林、金閣寺、清水寺、祇園花見小路、茶道體驗。',
+   warn:'旺季住宿需提前三個月訂。部分寺院禁拍照。祇園請勿追拍藝妓。',
+   tip:'伏見稻荷清晨去最美，人少又安靜。穿和服去金閣寺拍照超有氣氛🍵⛩️'},
+  {id:'jp-osaka',c:'jp',n:'大阪',e:'🏯',bk:'#FFF3E0',
+   why:'大阪人熱情，「吃垮自己」聞名，道頓堀霓虹燈和環球影城讓人流連。',
+   feat:'道頓堀、章魚燒、大阪燒、大阪城、環球影城哈利波特區、黑門市場。',
+   warn:'環球影城熱門設施等2-3小時，建議購快速通關。注意找零金額。',
+   tip:'道頓堀章魚燒真的一絕！環球影城必買快速通關，不然整天只玩三個設施😅🎢'},
+  {id:'jp-nara',c:'jp',n:'奈良',e:'🦌',bk:'#E8F5E9',
+   why:'上千頭神鹿自由漫步，能直接互動。東大寺大佛是日本最大木造建築。',
+   feat:'奈良公園餵鹿（鹿仙貝）、東大寺大佛殿、春日大社、奈良町老街、柿葉壽司。',
+   warn:'鹿看到食物會追人，手拿鹿仙貝要小心。不要給鹿塑膠袋，會傷害牠們。',
+   tip:'鹿鹿超可愛但也超會搶！慢慢餵不要一次拿太多，鹿頭真的會跟著你轉🦌🌿'},
+  {id:'jp-okinawa',c:'jp',n:'沖繩',e:'🌊',bk:'#E0F7FA',
+   why:'日本最美海灘，湛藍珊瑚礁是潛水天堂，獨特琉球文化與美食令人著迷。',
+   feat:'美麗海水族館（鯨鯊）、古宇利島、首里城、青之洞窟浮潛、沖繩苦瓜料理。',
+   warn:'6-9月颱風季，使用珊瑚友善防曬乳，租車是最方便的交通方式。',
+   tip:'青之洞窟浮潛超夢幻！能看到熱帶魚在洞穴藍光裡游泳，美到屏息🐠💙'},
+  {id:'fr-paris',c:'fr',n:'巴黎',e:'🗼',bk:'#E8EAF6',
+   why:'世界被拍最多的城市。從艾菲爾鐵塔到羅浮宮，每個轉角都是一幅畫。',
+   feat:'艾菲爾鐵塔（整點燈光秀）、羅浮宮、奧賽博物館、聖母院、塞納河遊船。',
+   warn:'扒手猖獗，尤其在地鐵和鐵塔附近。旺季需預約門票。8月許多商店關閉。',
+   tip:'艾菲爾鐵塔整點燈光秀超浪漫！可頌要在街邊小麵包店買才正宗✨🥐'},
+  {id:'fr-provence',c:'fr',n:'普羅旺斯',e:'💜',bk:'#F3E5F5',
+   why:'6-7月薰衣草田一望無際，紫色花海搭配石砌農舍，是最療癒的法式風景。',
+   feat:'瓦朗索勒薰衣草田、艾克斯老城、薰衣草博物館、亞維農教皇宮、古村落。',
+   warn:'6月中旬至7月中旬是花期，提前規劃。小村莊停車不易，建議租車。',
+   tip:'薰衣草花期只有一個月，查好花期再出發！帶一件白裙去拍照更好看🌸💜'},
+  {id:'it-rome',c:'it',n:'羅馬',e:'🏛️',bk:'#FBE9E7',
+   why:'羅馬是露天博物館，2000年古蹟與現代咖啡館並存，每個時刻都是穿越時空。',
+   feat:'競技場、梵蒂岡西斯汀教堂、許願池、西班牙廣場、羅馬歷史中心石板路。',
+   warn:'梵蒂岡須著長褲遮肩。旅遊區消費高，往小巷找當地人餐廳。注意扒手。',
+   tip:'許願池投幣許願超浪漫！吃正宗卡博納拉記得不是加奶油的版本🍝♟️'},
+  {id:'it-venice',c:'it',n:'威尼斯',e:'🛶',bk:'#E3F2FD',
+   why:'118個小島、117條運河，人類建築奇蹟。搭貢多拉在窄巷水道穿行是一生必做的事。',
+   feat:'大運河、聖馬可廣場、里阿爾托橋、貢多拉、穆拉諾玻璃島、布拉諾彩色漁村。',
+   warn:'漲潮時市區淹水需穿雨鞋。2024起白天進城需付日費。消費非常高。',
+   tip:'去布拉諾彩色島拍照！比主島人少很多，每棟房子都是打卡點🌈🛶'},
+  {id:'us-nyc',c:'us',n:'紐約',e:'🗽',bk:'#E8EAF6',
+   why:'全球文化在此交融，百老匯、中央公園、高線公園讓人留連忘返。',
+   feat:'時代廣場、中央公園、自由女神像（搭渡輪）、高線公園、DUMBO、大都會博物館。',
+   warn:'地鐵夜間安全性不穩定，夜晚盡量搭Uber。曼哈頓物價極高。',
+   tip:'去布魯克林DUMBO拍曼哈頓全景！時代廣場晚上去更有感覺🌃🗽'},
+  {id:'us-grandcanyon',c:'us',n:'大峽谷',e:'🏜️',bk:'#FFF3E0',
+   why:'600萬年雕刻的1.6公里深峽，日出日落時峽谷顏色變化如夢似幻。',
+   feat:'South Rim步道、Mather Point觀景台、直升機俯覽、科羅拉多河漂流。',
+   warn:'夏季45°C，每人每天至少帶4公升水。徒步下峽谷比上來輕鬆，謹慎評估體力。',
+   tip:'日出站在South Rim看光線從粉紅變金黃，這輩子都忘不了！🌄'},
+  {id:'us-hawaii',c:'us',n:'夏威夷',e:'🌺',bk:'#E8F5E9',
+   why:'火山創造的奇蹟，有全球最活躍火山、最美珊瑚礁海灘，以及溫情的Aloha精神。',
+   feat:'威基基海灘、鑽石頭山健行、火山國家公園（看熔岩）、珍珠港、北岸刨冰。',
+   warn:'海邊水流強勁，游泳前查看旗號警示。赤道附近紫外線極強，防曬很重要。',
+   tip:'在火山口看岩漿是瘋狂但超值得的體驗！夜晚去看，橘紅熔岩超震撼🌋'},
+  {id:'gb-london',c:'gb',n:'倫敦',e:'🎡',bk:'#EDE7F6',
+   why:'歷史、文化與現代潮流交會。免費世界頂級博物館和白金漢宮衛兵交接讓人難忘。',
+   feat:'大英博物館（免費）、倫敦塔與塔橋、白金漢宮衛兵交接、科文特花園、波羅市場。',
+   warn:'倫敦物價高，住宿提前預訂。乘地鐵用Oyster Card較划算。英國天氣多變。',
+   tip:'哈利波特影城要提前一個月訂票！波羅市場美食多，空腹去才能吃更多🧙🍺'},
+  {id:'th-bangkok',c:'th',n:'曼谷',e:'🛕',bk:'#FFFDE7',
+   why:'金碧輝煌的寺廟與摩天大樓相輝映，夜間街頭美食文化讓每個旅人著迷。',
+   feat:'玉佛寺、大皇宮、臥佛寺（泰式按摩發源地）、Chatuchak週末市集、昭披耶河遊船。',
+   warn:'進寺廟須著長褲遮肩。高溫潮濕大量補水。搭計程車用Grab APP。',
+   tip:'臥佛寺的泰式按摩只要幾百銖，全身舒暢！街邊芒果糯米飯要吃熱的🥭🛕'},
+  {id:'th-chiangmai',c:'th',n:'清邁',e:'🐘',bk:'#E8F5E9',
+   why:'泰北精神首都，古城牆內的寺廟讓人流連。倫理大象保育營是最溫暖的體驗。',
+   feat:'倫理大象保育中心（洗澡餵食）、週末夜間步行街、素帖寺、清邁烹飪課。',
+   warn:'只選擇不讓遊客騎象的倫理機構。3-4月燃燒季空氣品質差，注意呼吸。',
+   tip:'幫大象洗澡，牠們用鼻子噴你一臉水超好笑！是全泰國最溫暖的體驗🐘💚'},
+  {id:'is-aurora',c:'is',n:'冰島極光',e:'🌌',bk:'#E8EAF6',
+   why:'9月至4月在遠離光害的地點，能目睹綠色紫色光幕在夜空舞動的奇景。',
+   feat:'黃金圈（蓋歇爾間歇泉）、塞里雅蘭瀑布、Jökulsárlón冰河湖、冰川健行、藍湖溫泉。',
+   warn:'極光受太陽活動和天氣影響，建議在冰島待5天以上提高機率。F路需四輪驅動。',
+   tip:'看到極光的當下真的會哭出來！用APP（My Aurora Forecast）追蹤指數，達5以上就衝出去🌌💚'},
+  {id:'au-sydney',c:'au',n:'雪梨',e:'🦘',bk:'#E0F7FA',
+   why:'歌劇院是人類建築傑作，和煦陽光、邦代海灘衝浪文化讓人感受最輕鬆的生活節奏。',
+   feat:'雪梨歌劇院（導覽）、海港大橋（可攀爬）、邦代海灘、岩石區老市集、鳳梨頭步道。',
+   warn:'海灘有強勁海流，務必在紅黃旗之間游泳。灌木叢中注意有毒蜘蛛蛇。',
+   tip:'爬上海港大橋俯瞰雪梨港灣超難忘！邦代到庫吉的海崖健行也超美🌊🏄'}
+];
+
+/* Hand-drawn SVG illustrations for spots */
+const SPOT_SVG={
+  'jp-tokyo':`<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="120" fill="#E8F4F8"/>
+    <ellipse cx="100" cy="125" rx="80" ry="15" fill="#C0D8E0" opacity=".4"/>
+    <path d="M60,100 L85,45 L110,100 Z" fill="#D0DDE8" stroke="#7090A0" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M78,64 L85,45 L92,64 Q85,59 78,64 Z" fill="white"/>
+    <rect x="85" y="85" width="2" height="15" fill="#9090A0" rx="1"/>
+    <path d="M160,100 L155,55 M175,100 L180,55 M154,55 L181,55 M156,75 L179,75 M157,87 L178,87" stroke="#C8503A" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <rect x="155" y="45" width="26" height="10" rx="2" fill="#C8503A" stroke="#A03020" stroke-width="1"/>
+    <rect x="163" y="37" width="10" height="10" rx="1" fill="#C8503A"/>
+    <line x1="30" y1="100" x2="30" y2="68" stroke="#8B5E3C" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="30" y1="78" x2="20" y2="72" stroke="#8B5E3C" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="30" cy="66" r="14" fill="#FFB7C5" opacity=".8"/>
+    <circle cx="18" cy="70" r="9" fill="#FFB7C5" opacity=".7"/>
+    <circle cx="42" cy="68" r="10" fill="#FFB7C5" opacity=".7"/>
+    <circle cx="30" cy="62" r="4" fill="white" opacity=".5"/>
+    <path d="M5,105 Q100,95 195,105" stroke="#9090A0" stroke-width="1.5" fill="none"/>
+  </svg>`,
+  'jp-kyoto':`<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="120" fill="#FFF0F5"/>
+    <rect x="90" y="70" width="20" height="50" rx="3" fill="#D0604A"/>
+    <rect x="82" y="65" width="36" height="10" rx="2" fill="#C84830"/>
+    <rect x="86" y="55" width="28" height="12" rx="2" fill="#D0604A"/>
+    <rect x="78" y="50" width="44" height="8" rx="2" fill="#C84830"/>
+    <rect x="84" y="40" width="32" height="12" rx="2" fill="#D0604A"/>
+    <rect x="80" y="35" width="40" height="7" rx="2" fill="#C84830"/>
+    <rect x="88" y="25" width="24" height="12" rx="2" fill="#D0604A"/>
+    <rect x="84" y="20" width="32" height="6" rx="2" fill="#C84830"/>
+    <rect x="97" y="14" width="6" height="8" rx="1" fill="#D0604A"/>
+    <line x1="10" y1="70" x2="80" y2="70" stroke="#C84830" stroke-width="2.5"/>
+    <line x1="120" y1="70" x2="190" y2="70" stroke="#C84830" stroke-width="2.5"/>
+    <line x1="10" y1="62" x2="75" y2="62" stroke="#C84830" stroke-width="1.5"/>
+    <line x1="125" y1="62" x2="190" y2="62" stroke="#C84830" stroke-width="1.5"/>
+    <rect x="8" y="50" width="12" height="60" fill="#C84830" rx="2"/>
+    <rect x="180" y="50" width="12" height="60" fill="#C84830" rx="2"/>
+    <circle cx="50" cy="55" r="18" fill="#FFB7C5" opacity=".75"/>
+    <circle cx="155" cy="52" r="15" fill="#FFB7C5" opacity=".75"/>
+    <circle cx="35" cy="48" r="12" fill="#FFB7C5" opacity=".6"/>
+    <circle cx="168" cy="45" r="10" fill="#FFB7C5" opacity=".6"/>
+  </svg>`,
+  'fr-paris':`<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="120" fill="#ECF0F8"/>
+    <path d="M90,110 L95,80 L85,60 L100,15 L115,60 L105,80 L110,110 Z" fill="#8A90B0" stroke="#6A7090" stroke-width="1.2" stroke-linejoin="round"/>
+    <line x1="85" y1="80" x2="115" y2="80" stroke="#6A7090" stroke-width="1.5"/>
+    <line x1="87" y1="60" x2="113" y2="60" stroke="#6A7090" stroke-width="1.5"/>
+    <rect x="95" y="12" width="10" height="6" rx="1" fill="#6A7090"/>
+    <line x1="90" y1="95" x2="110" y2="95" stroke="#6A7090" stroke-width="2"/>
+    <ellipse cx="40" cy="88" rx="35" ry="8" fill="#B0C090" opacity=".5"/>
+    <ellipse cx="160" cy="90" rx="30" ry="7" fill="#B0C090" opacity=".5"/>
+    <circle cx="30" cy="40" r="5" fill="#FFD700" opacity=".6"/>
+    <circle cx="170" cy="35" r="4" fill="#FFD700" opacity=".5"/>
+    <path d="M5,100 Q100,93 195,100" stroke="#9090A0" stroke-width="1.5" fill="none"/>
+    <path d="M20,100 Q20,82 5,78" stroke="#8A6A50" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M180,100 Q180,85 195,80" stroke="#8A6A50" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`,
+  'it-rome':`<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="120" fill="#FBF0E8"/>
+    <rect x="5" y="80" width="190" height="40" fill="#E8D0B0" opacity=".4"/>
+    <path d="M60,100 L60,55 Q60,40 75,40 L125,40 Q140,40 140,55 L140,100 Z" fill="#D4B888" stroke="#B09060" stroke-width="1.5"/>
+    <path d="M62,55 Q62,42 76,42 L86,42 L86,100 L62,100 Z" fill="#C8A870"/>
+    <path d="M114,42 L124,42 Q138,42 138,55 L138,100 L114,100 Z" fill="#C8A870"/>
+    <ellipse cx="100" cy="42" rx="40" ry="6" fill="none" stroke="#B09060" stroke-width="1.5"/>
+    <ellipse cx="100" cy="55" rx="40" ry="5" fill="none" stroke="#B09060" stroke-width="1"/>
+    <ellipse cx="100" cy="68" rx="40" ry="5" fill="none" stroke="#B09060" stroke-width="1"/>
+    <ellipse cx="100" cy="81" rx="40" ry="5" fill="none" stroke="#B09060" stroke-width="1"/>
+    <rect x="78" y="75" width="44" height="25" fill="#C8A870"/>
+    <path d="M78,75 L100,55 L122,75 Z" fill="#D4B888"/>
+    <rect x="88" y="80" width="24" height="20" rx="12" fill="#B09060"/>
+    <circle cx="30" cy="50" r="15" fill="#D4B888" stroke="#B09060" stroke-width="1"/>
+    <rect x="20" y="65" width="20" height="35" fill="#D4B888" stroke="#B09060" stroke-width="1"/>
+    <circle cx="170" cy="55" r="12" fill="#D4B888" stroke="#B09060" stroke-width="1"/>
+    <rect x="160" y="67" width="20" height="33" fill="#D4B888" stroke="#B09060" stroke-width="1"/>
+  </svg>`,
+  'is-aurora':`<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="120" fill="#0A0A2A"/>
+    <defs>
+      <radialGradient id="ag1" cx="40%" cy="50%"><stop offset="0%" stop-color="#00FF88" stop-opacity=".7"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+      <radialGradient id="ag2" cx="70%" cy="40%"><stop offset="0%" stop-color="#8800FF" stop-opacity=".5"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+      <radialGradient id="ag3" cx="55%" cy="60%"><stop offset="0%" stop-color="#00CCFF" stop-opacity=".4"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+    </defs>
+    <ellipse cx="80" cy="60" rx="90" ry="50" fill="url(#ag1)"/>
+    <ellipse cx="140" cy="48" rx="70" ry="45" fill="url(#ag2)"/>
+    <ellipse cx="110" cy="70" rx="60" ry="35" fill="url(#ag3)"/>
+    <path d="M5,115 L30,80 L55,90 L80,65 L110,75 L140,55 L170,70 L195,50 L195,120 Z" fill="#1A1A3A"/>
+    <path d="M5,115 L30,88 L55,95 L80,72 L110,82 L140,62 L170,77 L195,57" stroke="#2A2A5A" stroke-width="1" fill="none"/>
+    <circle cx="20" cy="25" r="1" fill="white" opacity=".8"/>
+    <circle cx="50" cy="15" r="1.2" fill="white" opacity=".9"/>
+    <circle cx="150" cy="20" r="1" fill="white" opacity=".7"/>
+    <circle cx="180" cy="12" r="1.3" fill="white"/>
+    <circle cx="170" cy="30" r=".8" fill="white" opacity=".8"/>
+    <circle cx="90" cy="10" r="1" fill="white" opacity=".7"/>
+    <circle cx="130" cy="8" r=".8" fill="white" opacity=".9"/>
+  </svg>`,
+  'au-sydney':`<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="120" fill="#B8D8F0"/>
+    <path d="M5,90 Q100,83 195,90 L195,120 L5,120 Z" fill="#5090C0" opacity=".5"/>
+    <path d="M5,95 Q100,88 195,95" stroke="#3070A0" stroke-width="1.5" fill="none"/>
+    <path d="M65,90 Q65,55 80,45 Q90,38 95,30 Q100,22 100,18 Q100,22 105,30 Q110,38 120,45 Q135,55 135,90 Z" fill="#F0ECD8" stroke="#C8B890" stroke-width="1.5"/>
+    <path d="M80,90 Q80,60 88,50 Q94,43 100,38 Q106,43 112,50 Q120,60 120,90 Z" fill="#EAE4C8" opacity=".7"/>
+    <path d="M65,90 Q70,85 80,85 Q90,85 95,80 Q100,76 105,80 Q110,85 120,85 Q130,85 135,90 Z" fill="#D8D0B0" opacity=".5"/>
+    <path d="M40,90 L40,60 Q40,50 50,50 L60,50 Q65,50 65,58 L65,90 Z" fill="#F0ECD8" stroke="#C8B890" stroke-width="1.3"/>
+    <path d="M135,90 L135,65 Q135,55 145,55 L155,55 Q162,55 162,63 L162,90 Z" fill="#F0ECD8" stroke="#C8B890" stroke-width="1.3"/>
+    <path d="M5,90 L195,90" stroke="#8A8070" stroke-width="1.5"/>
+    <circle cx="22" cy="45" r="5" fill="#FFD700" opacity=".8"/>
+    <circle cx="178" cy="40" r="4" fill="#FFD700" opacity=".7"/>
+  </svg>`,
+};
+function getSpotSVG(s){
+  const svg=SPOT_SVG[s.id];
+  if(svg) return svg;
+  return`<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="120" fill="${s.bk||'#F0ECD8'}"/>
+    <text x="100" y="70" text-anchor="middle" font-size="48">${s.e}</text>
+  </svg>`;
+}
+
+/* ── ART EVENTS ── */
+const EVENTS=[
+  {id:'e1',cat:'展覽',emoji:'🖼️',title:'臺北當代藝術館　魔幻現實：拉丁美洲特展',date:'2025/03 – 07/20',loc:'臺北市大同區 MOCA Taipei',
+   desc:'集結12位拉丁美洲藝術家的原作，探索魔幻現實主義在當代藝術的延伸，充滿奇幻色彩。'},
+  {id:'e2',cat:'節慶',emoji:'🏮',title:'2025 臺灣燈會　台中篇',date:'2025/02/12 – 03/02',loc:'台中市烏日區高鐵特區',
+   desc:'以「蛇年，福氣來！」為主題，超過三百組大型花燈藝術裝置，結合科技光雕與傳統工藝。'},
+  {id:'e3',cat:'表演',emoji:'🎭',title:'臺北藝術節　夏季特別演出',date:'2025/07 – 08月',loc:'臺北市各場館',
+   desc:'臺北藝術節年度盛事，國際頂尖劇團與臺灣本土藝術家聯合演出，涵蓋劇場、舞蹈、音樂等多元形式。'},
+  {id:'e4',cat:'戶外',emoji:'🎈',title:'臺東熱氣球嘉年華',date:'2025/06/28 – 08/10',loc:'臺東縣鹿野高台',
+   desc:'全台最夢幻的夏季節慶，數十顆造型熱氣球在台東晨光中升空，能體驗熱氣球飛行的震撼感受。'},
+  {id:'e5',cat:'展覽',emoji:'🏺',title:'故宮院藏精品　唐宋書畫大展',date:'2025/04/05 – 09/28',loc:'臺北市士林區故宮博物院',
+   desc:'首次公開展示多件唐宋珍貴書畫，包括傳世絕本，是近年最受矚目的故宮年度大展。'},
+  {id:'e6',cat:'節慶',emoji:'🌊',title:'宜蘭童玩藝術節',date:'2025/07/04 – 08/03',loc:'宜蘭縣冬山河親水公園',
+   desc:'全球最大兒童藝術節，來自世界各地的表演團體共聚宜蘭，水上活動與藝術表演同步展開。'},
+  {id:'e7',cat:'電影',emoji:'🎬',title:'金馬影展2025',date:'2025/11月（預定）',loc:'臺北市各電影院',
+   desc:'華語電影界最重要的年度盛事，匯聚全球華語佳作首映，電影人和影迷的年度朝聖之旅。'},
+  {id:'e8',cat:'音樂',emoji:'🎵',title:'大港開唱　高雄音樂祭',date:'2025/03/29 – 30',loc:'高雄市駁二藝術特區',
+   desc:'台灣最大的搖滾音樂祭，結合駁二港口的壯闊場景，匯聚台灣及亞洲頂尖獨立樂團。'},
+  {id:'e9',cat:'展覽',emoji:'🌿',title:'花蓮石雕藝術季',date:'2025/08月',loc:'花蓮縣花蓮市文化局廣場',
+   desc:'來自世界各地的石雕藝術家現場創作，能親眼見證大理石如何在藝術家手中變成生命。'},
+  {id:'e10',cat:'藝術博覽',emoji:'🎨',title:'Art Taipei 2025　臺北藝術博覽會',date:'2025/10/31 – 11/03',loc:'臺北世界貿易中心',
+   desc:'亞洲最具影響力的藝術博覽會之一，超過百家國內外畫廊參展，是藝術投資與欣賞的年度盛典。'},
+  {id:'e11',cat:'表演',emoji:'🩰',title:'臺中古典芭蕾週　俄羅斯皇家芭蕾',date:'2025/05月',loc:'臺中市國家歌劇院',
+   desc:'俄羅斯頂尖芭蕾舞團來台演出《天鵝湖》《睡美人》，完整呈現古典芭蕾的極致美麗。'},
+  {id:'e12',cat:'戶外',emoji:'🌸',title:'陽明山花季',date:'2025/02/15 – 03/31',loc:'臺北市陽明山國家公園',
+   desc:'每年春天，陽明山的杜鵑花、海芋、山桜一同盛放，是台北近郊最壯觀的賞花體驗。'},
+];
+
+/* ── BADGES ── */
+const BADGES=[
+  {id:'first_step',n:'第一步',sub:'獲得第一顆鑽石',cost:1,icon:'🌟',
+   svg:`<svg width="60" height="60" viewBox="0 0 60 60"><polygon points="30,5 37,22 55,22 41,33 47,50 30,40 13,50 19,33 5,22 23,22" fill="#FFD700" stroke="#C8A000" stroke-width="1.5" stroke-linejoin="round"/><circle cx="30" cy="28" r="8" fill="#FFF0A0" opacity=".6"/></svg>`},
+  {id:'diary_fan',n:'日記迷',sub:'記錄7天日記',cost:20,icon:'📖',
+   svg:`<svg width="60" height="60" viewBox="0 0 60 60"><rect x="12" y="8" width="36" height="44" rx="4" fill="#E8D8B8" stroke="#C8B090" stroke-width="1.5"/><line x1="18" y1="20" x2="42" y2="20" stroke="#C8B090" stroke-width="1.2"/><line x1="18" y1="28" x2="42" y2="28" stroke="#C8B090" stroke-width="1.2"/><line x1="18" y1="36" x2="35" y2="36" stroke="#C8B090" stroke-width="1.2"/><path d="M10,8 L10,52 Q10,56 14,56 L46,56 Q50,56 50,52 L50,8" stroke="#C8B090" stroke-width="1" fill="none"/></svg>`},
+  {id:'traveler',n:'旅人',sub:'拜訪5個景點',cost:25,icon:'🗺️',
+   svg:`<svg width="60" height="60" viewBox="0 0 60 60"><rect x="10" y="12" width="40" height="36" rx="4" fill="#FFF5E0" stroke="#C8B090" stroke-width="1.5"/><path d="M10,25 L50,25" stroke="#C8B090" stroke-width="1"/><path d="M10,38 L50,38" stroke="#C8B090" stroke-width="1"/><circle cx="32" cy="32" r="7" fill="none" stroke="#5A8FAE" stroke-width="1.5"/><line x1="32" y1="25" x2="32" y2="38" stroke="#5A8FAE" stroke-width=".8"/><line x1="25" y1="32" x2="50" y2="32" stroke="#5A8FAE" stroke-width=".8"/></svg>`},
+  {id:'planner',n:'計畫達人',sub:'完成30項待辦',cost:30,icon:'✅',
+   svg:`<svg width="60" height="60" viewBox="0 0 60 60"><rect x="12" y="10" width="36" height="40" rx="5" fill="#E8F5E9" stroke="#6A9E6E" stroke-width="1.5"/><polyline points="22,25 27,30 38,19" stroke="#6A9E6E" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="22" y1="35" x2="38" y2="35" stroke="#C8D8C0" stroke-width="1.2"/><line x1="22" y1="41" x2="32" y2="41" stroke="#C8D8C0" stroke-width="1.2"/></svg>`},
+  {id:'diamond_hoard',n:'鑽石大亨',sub:'累積50顆鑽石',cost:50,icon:'💎',
+   svg:`<svg width="60" height="60" viewBox="0 0 60 60"><polygon points="30,8 50,22 50,38 30,52 10,38 10,22" fill="#A0D8F0" stroke="#5090C0" stroke-width="1.5"/><polygon points="30,8 50,22 30,52 10,22" fill="#60B8E8" opacity=".5"/><line x1="10" y1="22" x2="50" y2="22" stroke="#5090C0" stroke-width="1"/></svg>`},
+  {id:'art_lover',n:'藝文控',sub:'查看5個藝文活動',cost:15,icon:'🎨',
+   svg:`<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="#FBE9E7" stroke="#C8503A" stroke-width="1.5"/><circle cx="20" cy="24" r="4" fill="#C8503A"/><circle cx="38" cy="22" r="4" fill="#6A9E6E"/><circle cx="42" cy="38" r="4" fill="#5A8FAE"/><circle cx="22" cy="40" r="4" fill="#C8922A"/><circle cx="31" cy="35" r="4" fill="#8A78B8"/></svg>`},
+  {id:'mood_master',n:'心情大師',sub:'記錄6種不同心情',cost:20,icon:'🌈',
+   svg:`<svg width="60" height="60" viewBox="0 0 60 60"><path d="M8,35 Q30,5 52,35" fill="none" stroke="#C8503A" stroke-width="3" stroke-linecap="round"/><path d="M10,38 Q30,12 50,38" fill="none" stroke="#C8922A" stroke-width="2.5" stroke-linecap="round"/><path d="M13,41 Q30,18 47,41" fill="none" stroke="#C8C830" stroke-width="2" stroke-linecap="round"/><path d="M16,44 Q30,24 44,44" fill="none" stroke="#6A9E6E" stroke-width="2" stroke-linecap="round"/><path d="M19,47 Q30,30 41,47" fill="none" stroke="#5A8FAE" stroke-width="2" stroke-linecap="round"/><path d="M22,50 Q30,36 38,50" fill="none" stroke="#8A78B8" stroke-width="1.5" stroke-linecap="round"/></svg>`},
+  {id:'champion',n:'全能冠軍',sub:'擁有全部其他徽章',cost:100,icon:'🏆',
+   svg:`<svg width="60" height="60" viewBox="0 0 60 60"><path d="M20,10 L40,10 L45,30 Q30,42 15,30 Z" fill="#FFD700" stroke="#C8A000" stroke-width="1.5"/><rect x="25" y="40" width="10" height="10" fill="#C8A000"/><rect x="18" y="50" width="24" height="4" rx="2" fill="#C8A000"/><line x1="15" y1="20" x2="5" y2="20 " stroke="#C8A000" stroke-width="2"/><line x1="45" y1="20" x2="55" y2="20" stroke="#C8A000" stroke-width="2"/><circle cx="30" cy="22" r="8" fill="#FFF0A0" opacity=".7"/></svg>`},
+];
+
+/* ── DAILY CHALLENGES ── */
+const DC_ICONS={
+  dc_todo:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4,9 7.5,12.5 13,6"/><line x1="17" y1="9" x2="24" y2="9"/><polyline points="4,18 7.5,21.5 13,15"/><line x1="17" y1="18" x2="24" y2="18"/></svg>`,
+  dc_cal:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="20" height="18" rx="2.5"/><line x1="9" y1="2.5" x2="9" y2="7.5"/><line x1="19" y1="2.5" x2="19" y2="7.5"/><line x1="4" y1="11" x2="24" y2="11"/><circle cx="10" cy="17" r="1.5" fill="#C8503A" stroke="none"/><circle cx="14" cy="17" r="1.5" fill="#C8922A" stroke="none"/><circle cx="18" cy="17" r="1.5" fill="#6A9E6E" stroke="none"/></svg>`,
+  dc_photo:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="22" height="16" rx="2.5"/><circle cx="14" cy="15" r="4"/><path d="M9.5,7 L11,4 L17,4 L18.5,7"/><circle cx="21" cy="10.5" r="1.2" fill="currentColor" stroke="none"/></svg>`,
+  dc_water:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14,4 C14,4 6,12 6,17.5 C6,21.5 9.7,25 14,25 C18.3,25 22,21.5 22,17.5 C22,12 14,4 14,4 Z"/><path d="M9,19 C9.5,21.5 12,23 14.5,22.5" stroke-width="1.2" opacity=".6"/></svg>`,
+  dc_spot:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14,3 L4,24 L14,20 L24,24 Z"/><line x1="14" y1="3" x2="14" y2="20"/><line x1="5.5" y1="17.5" x2="22.5" y2="17.5"/></svg>`,
+  dc_art:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14,4.5 C9,4.5 4.5,9 4.5,14 C4.5,19.1 9,23.5 14,23.5 C15.4,23.5 16.4,22.5 16.4,21.3 C16.4,20.7 16.2,20.2 16.2,19.6 C16.2,18.4 17.2,17.4 18.5,17.4 L21,17.4 C23.6,17.4 24,15.8 24,14 C24,9 19.3,4.5 14,4.5"/><circle cx="9" cy="11" r="1.8" fill="#C8503A" stroke="none"/><circle cx="13.5" cy="8" r="1.8" fill="#6A9E6E" stroke="none"/><circle cx="18.5" cy="10" r="1.8" fill="#5A8FAE" stroke="none"/></svg>`,
+  dc_mood:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round"><circle cx="14" cy="14" r="10"/><path d="M9,17 C10,20 18,20 19,17"/><circle cx="10.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="17.5" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>`,
+};
+const DAILY_CHALLENGES=[
+  {id:'dc_todo',title:'完成今日所有計畫',desc:'把清單全部打勾！',rew:5},
+  {id:'dc_cal',title:'在月曆記錄心情',desc:'今天心情如何？',rew:3},
+  {id:'dc_photo',title:'拍一張美麗的風景',desc:'用心感受美好',rew:3},
+  {id:'dc_water',title:'喝夠8杯水',desc:'照顧好自己的身體',rew:2},
+  {id:'dc_spot',title:'探索一個景點',desc:'去旅遊頁面看看',rew:2},
+  {id:'dc_art',title:'查看藝文活動',desc:'看看有什麼好活動',rew:2},
+  {id:'dc_mood',title:'選擇今日心情標籤',desc:'探索不同的心情',rew:2},
+];
+
+/* ── ANIMALS ── */
+const ANIMALS=[
+  {praises:['你好棒棒！！🎉','繼續加油喔！✨','你是我見過最努力的人！','哇嗚！完成了！太強了！','你做到了！我超驕傲！'],
+   draw:(s)=>{// Bunny
+    s.innerHTML=`<svg width="90" height="90" viewBox="0 0 90 90"><ellipse cx="45" cy="65" rx="22" ry="18" fill="#FFF0F5" stroke="#D87890" stroke-width="1.5"/><ellipse cx="45" cy="38" rx="18" ry="20" fill="#FFF0F5" stroke="#D87890" stroke-width="1.5"/><ellipse cx="35" cy="16" rx="6" ry="18" fill="#FFF0F5" stroke="#D87890" stroke-width="1.5"/><ellipse cx="55" cy="16" rx="6" ry="18" fill="#FFF0F5" stroke="#D87890" stroke-width="1.5"/><ellipse cx="35" cy="13" rx="3.5" ry="15" fill="#FFB7C5"/><ellipse cx="55" cy="13" rx="3.5" ry="15" fill="#FFB7C5"/><circle cx="37" cy="35" r="4.5" fill="#2D2820"/><circle cx="53" cy="35" r="4.5" fill="#2D2820"/><circle cx="38.5" cy="33.5" r="1.8" fill="white"/><circle cx="54.5" cy="33.5" r="1.8" fill="white"/><ellipse cx="45" cy="44" rx="3" ry="2" fill="#FFB7C5"/><path d="M39,49 Q45,53 51,49" stroke="#D87890" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="27" cy="52" rx="5" ry="3" fill="#FFB7C5" opacity=".4"/><ellipse cx="63" cy="52" rx="5" ry="3" fill="#FFB7C5" opacity=".4"/><path d="M36,72 Q36,82 28,83" stroke="#FFF0F5" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M54,72 Q54,82 62,83" stroke="#FFF0F5" stroke-width="4" fill="none" stroke-linecap="round"/><line x1="36" y1="72" x2="28" y2="83" stroke="#D87890" stroke-width="2" stroke-linecap="round"/><line x1="54" y1="72" x2="62" y2="83" stroke="#D87890" stroke-width="2" stroke-linecap="round"/></svg>`;
+   }},
+  {praises:['厲害！繼續保持！🐻','你做到了，熊熊為你驕傲！','完成任務！超級棒！','你是今天最努力的人！','加油！你能做到更多！'],
+   draw:(s)=>{// Bear
+    s.innerHTML=`<svg width="90" height="90" viewBox="0 0 90 90"><ellipse cx="45" cy="60" rx="24" ry="20" fill="#D4A870" stroke="#B08050" stroke-width="1.5"/><ellipse cx="45" cy="40" rx="20" ry="22" fill="#D4A870" stroke="#B08050" stroke-width="1.5"/><circle cx="28" cy="24" r="10" fill="#D4A870" stroke="#B08050" stroke-width="1.5"/><circle cx="62" cy="24" r="10" fill="#D4A870" stroke="#B08050" stroke-width="1.5"/><circle cx="28" cy="24" r="6" fill="#C09060"/><circle cx="62" cy="24" r="6" fill="#C09060"/><circle cx="37" cy="36" r="5" fill="#2D2820"/><circle cx="53" cy="36" r="5" fill="#2D2820"/><circle cx="38.5" cy="34.5" r="2" fill="white"/><circle cx="54.5" cy="34.5" r="2" fill="white"/><ellipse cx="45" cy="48" rx="8" ry="5" fill="#C09060"/><ellipse cx="45" cy="47" rx="4.5" ry="3" fill="#FFB7A0"/><path d="M40,52 Q45,57 50,52" stroke="#B08050" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="30" cy="55" rx="6" ry="4" fill="#C09060" opacity=".5"/><ellipse cx="60" cy="55" rx="6" ry="4" fill="#C09060" opacity=".5"/></svg>`;
+   }},
+  {praises:['哇！完成了！你超厲害的！🦊','狐狸為你喝采！繼續！','任務達成！你是最棒的！','好厲害！今天又進步了！','你的努力我都看見了！'],
+   draw:(s)=>{// Fox
+    s.innerHTML=`<svg width="90" height="90" viewBox="0 0 90 90"><ellipse cx="45" cy="62" rx="22" ry="18" fill="#E8803A" stroke="#C06020" stroke-width="1.5"/><ellipse cx="45" cy="40" rx="20" ry="22" fill="#E8803A" stroke="#C06020" stroke-width="1.5"/><polygon points="25,25 18,5 35,22" fill="#E8803A" stroke="#C06020" stroke-width="1.5"/><polygon points="65,25 72,5 55,22" fill="#E8803A" stroke="#C06020" stroke-width="1.5"/><polygon points="27,23 21,8 34,21" fill="white"/><polygon points="63,23 69,8 56,21" fill="white"/><circle cx="36" cy="37" r="5" fill="#2D2820"/><circle cx="54" cy="37" r="5" fill="#2D2820"/><circle cx="37.5" cy="35.5" r="2" fill="white"/><circle cx="55.5" cy="35.5" r="2" fill="white"/><ellipse cx="45" cy="48" rx="10" ry="6" fill="white"/><ellipse cx="45" cy="47" rx="3.5" ry="2.5" fill="#FFB7A0"/><path d="M39,52 Q45,58 51,52" stroke="#C06020" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="30" cy="54" rx="5" ry="3" fill="#E8803A" opacity=".4"/><ellipse cx="60" cy="54" rx="5" ry="3" fill="#E8803A" opacity=".4"/></svg>`;
+   }},
+  {praises:['呱呱！你做到了！🐸','青蛙說：你是最棒的！','哇！完成！真厲害！','呱呱呱！繼續加油！','你跳過了難關！棒棒！'],
+   draw:(s)=>{// Frog
+    s.innerHTML=`<svg width="90" height="90" viewBox="0 0 90 90"><ellipse cx="45" cy="60" rx="26" ry="20" fill="#7ABF6A" stroke="#5A9E4A" stroke-width="1.5"/><ellipse cx="45" cy="40" rx="22" ry="24" fill="#7ABF6A" stroke="#5A9E4A" stroke-width="1.5"/><ellipse cx="25" cy="25" rx="12" ry="10" fill="#7ABF6A" stroke="#5A9E4A" stroke-width="1.5"/><ellipse cx="65" cy="25" rx="12" ry="10" fill="#7ABF6A" stroke="#5A9E4A" stroke-width="1.5"/><circle cx="26" cy="26" r="7" fill="white"/><circle cx="64" cy="26" r="7" fill="white"/><circle cx="26" cy="26" r="4.5" fill="#2D2820"/><circle cx="64" cy="26" r="4.5" fill="#2D2820"/><circle cx="27.5" cy="24.5" r="1.8" fill="white"/><circle cx="65.5" cy="24.5" r="1.8" fill="white"/><path d="M36,48 Q45,56 54,48" stroke="#5A9E4A" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="45" cy="50" rx="12" ry="5" fill="#90CF80" opacity=".4"/><path d="M24,72 Q18,78 12,80" stroke="#7ABF6A" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M66,72 Q72,78 78,80" stroke="#7ABF6A" stroke-width="5" fill="none" stroke-linecap="round"/></svg>`;
+   }},
+  {praises:['做到了！熊貓為你鼓掌！🐼','完成！你比竹子還堅強！','哇！黑白分明的你真棒！','繼續！一步一步就是成功！','你的努力熊貓都知道！'],
+   draw:(s)=>{// Panda
+    s.innerHTML=`<svg width="90" height="90" viewBox="0 0 90 90"><ellipse cx="45" cy="62" rx="23" ry="18" fill="white" stroke="#9090A0" stroke-width="1.5"/><ellipse cx="45" cy="40" rx="21" ry="23" fill="white" stroke="#9090A0" stroke-width="1.5"/><circle cx="28" cy="22" r="12" fill="#2D2820"/><circle cx="62" cy="22" r="12" fill="#2D2820"/><circle cx="28" cy="22" r="7" fill="white"/><circle cx="62" cy="22" r="7" fill="white"/><ellipse cx="36" cy="38" rx="7" ry="6" fill="#2D2820"/><ellipse cx="54" cy="38" rx="7" ry="6" fill="#2D2820"/><circle cx="36" cy="37" r="4" fill="#2D2820"/><circle cx="54" cy="37" r="4" fill="#2D2820"/><circle cx="37.5" cy="35.5" r="2" fill="white"/><circle cx="55.5" cy="35.5" r="2" fill="white"/><ellipse cx="45" cy="50" rx="5" ry="3.5" fill="#FFB7B7"/><path d="M39,55 Q45,61 51,55" stroke="#9090A0" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`;
+   }},
+];
+
+/* ═══════════════════════
+   GLOBAL STATE
+═══════════════════════ */
+function loadState(){return JSON.parse(localStorage.getItem('bs2_state')||'null')||{
+  profile:{name:'',nick:'',birthday:'',blood:'',zodiac:'',persona:'',hobby:'',motto:'',dream:'',mood:'',avatar:'🐱',fontSize:1},
+  diamonds:0,badges:[],challenges:{date:'',done:[]},
+  calData:{},tripData:{},todos:{date:'',items:[]},artViewed:[],
+  stats:{calDays:0,totalTodos:0,useSince:new Date().toDateString()},
+  history:[]
+};}
+function saveState(){
+  localStorage.setItem('bs2_state',JSON.stringify(S));
+  if(window.saveToCloud) window.saveToCloud(S);
+}
+let S=loadState();
+if(!S.history) S.history=[];
+
+window.loadFromCloud=function(cloudS){
+  S=cloudS;if(!S.history)S.history=[];
+  localStorage.setItem('bs2_state',JSON.stringify(S));
+  buildCal();buildSpots();buildChallenges();buildBadges();
+  renderEvents();initTodos();loadProfile();renderHistory();
+};
+
+function addLog(type,desc,icon){
+  S.history.unshift({id:Date.now(),type,desc,icon,time:new Date().getTime()});
+  if(S.history.length>100)S.history.pop();
+  saveState();renderHistory();
+}
+
+function renderHistory(){
+  const list=document.getElementById('history-list');
+  if(!list)return;
+  if(!S.history||!S.history.length){
+    list.innerHTML='<div class="text-muted" style="text-align:center;padding:2rem">目前還沒有任何記錄，去其他頁面探索看看吧！</div>';
+    return;
+  }
+  list.innerHTML=S.history.map(h=>{
+    const dt=new Date(h.time);
+    const ts=`${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+    return`<div class="tl-item">
+      <div class="tl-icon">${h.icon}</div>
+      <div class="tl-content">
+        <div class="tl-time">${ts}</div>
+        <div class="tl-desc">${h.desc}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════
+   CALENDAR
+═══════════════════════ */
+let calYr=new Date().getFullYear(),calMo=new Date().getMonth();
+let pickerYr=calYr;
+
+function togglePicker(){
+  const p=document.getElementById('cal-picker');
+  if(p.classList.contains('open')){p.classList.remove('open');return;}
+  pickerYr=calYr;
+  renderPicker();
+  p.classList.add('open');
+}
+function closePicker(){document.getElementById('cal-picker').classList.remove('open');}
+function chPickerYear(d){pickerYr+=d;renderPicker();}
+function renderPicker(){
+  document.getElementById('cp-year-lbl').textContent=pickerYr+' 年';
+  document.getElementById('cp-months').innerHTML=
+    ['一','二','三','四','五','六','七','八','九','十','十一','十二'].map((m,i)=>
+      `<button class="cp-mo${pickerYr===calYr&&i===calMo?' cur':''}" onclick="pickMonth(${i})">${m}月</button>`
+    ).join('');
+}
+function pickMonth(m){calYr=pickerYr;calMo=m;closePicker();buildCal();}
+// Close picker when clicking outside
+document.addEventListener('click',e=>{
+  const p=document.getElementById('cal-picker');
+  if(!p)return;
+  if(!p.contains(e.target)&&!document.getElementById('cal-title').contains(e.target)){
+    p.classList.remove('open');
+  }
+},{capture:true});
+
+function hexToRgba(hex,alpha){
+  const r=parseInt(hex.slice(1,3),16);
+  const g=parseInt(hex.slice(3,5),16);
+  const b=parseInt(hex.slice(5,7),16);
+  return`rgba(${r},${g},${b},${alpha})`;
+}
+function buildCal(){
+  document.getElementById('cal-title').textContent=calYr+' 年 '+MONTHS[calMo];
+  document.getElementById('cal-wdays').innerHTML=WD.map(d=>`<div class="cal-wd">${d}</div>`).join('');
+  const fd=new Date(calYr,calMo,1).getDay();
+  const dm=new Date(calYr,calMo+1,0).getDate();
+  const dpm=new Date(calYr,calMo,0).getDate();
+  const td=new Date();
+  let cells=[];
+  for(let i=fd-1;i>=0;i--) cells.push({d:dpm-i,other:true});
+  for(let d=1;d<=dm;d++){
+    const k=`${calYr}-${calMo}-${d}`;
+    const rec=S.calData[k];
+    const isT=(d===td.getDate()&&calMo===td.getMonth()&&calYr===td.getFullYear());
+    const hol=getHolForDate(calYr,calMo,d);
+    cells.push({d,k,rec,isT,hol});
+  }
+  let nx=1;while(cells.length%7!==0)cells.push({d:nx++,other:true});
+  const g=document.getElementById('cal-grid');
+  g.innerHTML=cells.map(c=>{
+    let cl='cal-cell';
+    if(c.other)cl+=' other';if(c.isT)cl+=' today';
+    const holStyle=c.hol?` style="--hcol:${hexToRgba(c.hol.color||'#8A78B8',0.45)}"`:'' ;
+    if(c.hol)cl+=' has-holiday';
+    let inn=`<div class="dnum">${c.d}</div>`;
+    if(c.rec?.mood)inn+=`<div class="dmood">${c.rec.mood}</div>`;
+    if(c.hol)inn+=`<span class="htip">${c.hol.n}</span>`;
+    return`<div class="${cl}"${holStyle}${c.k?` onclick="openDay('${c.k}',${c.d})"`:''} title="${c.hol?c.hol.n:''}">${inn}</div>`;
+  }).join('');
+  buildHolidayList();
+}
+function chMonth(d){calMo+=d;if(calMo>11){calMo=0;calYr++;}if(calMo<0){calMo=11;calYr--;}buildCal();}
+
+/* Holiday sidebar */
+function buildHolidayList(){
+  const today=new Date();
+  const upcoming=[];
+  const seen=new Set();
+  // Scan next 180 days for standard holidays
+  for(let days=0;days<=180;days++){
+    const d=new Date(today.getTime()+days*86400000);
+    const hol=getHolForDate(d.getFullYear(),d.getMonth(),d.getDate());
+    if(hol&&!seen.has(hol.n)){
+      seen.add(hol.n);
+      upcoming.push({h:hol,days,date:`${d.getMonth()+1}/${d.getDate()}`});
+    }
+  }
+  upcoming.sort((a,b)=>a.days-b.days);
+  document.getElementById('holiday-list').innerHTML=upcoming.slice(0,7).map(u=>`
+    <div class="h-item${u.h.isCustom?' h-custom':''}">
+      <div class="h-dot" style="background:${u.h.color||'#8A78B8'}"></div>
+      <div style="flex:1">${u.h.n}</div>
+      <div class="h-days">${u.days===0?'今天！':u.days===1?'明天':u.days+'天後'}<br><span style="opacity:.7">${u.date}</span></div>
+    </div>`).join('')||'<div class="text-muted" style="text-align:center">近期沒有節日</div>';
+  renderCustomHolidays();
+}
+function addCustomHoliday(){
+  const nm=document.getElementById('h-name').value.trim();
+  const dt=document.getElementById('h-date').value;
+  if(!nm||!dt)return;
+  if(!S.calData.__custom)S.calData.__custom=[];
+  S.calData.__custom.push({id:'c'+Date.now(),name:nm,date:dt,custom:true,color:'#8A78B8'});
+  saveState();
+  document.getElementById('h-name').value='';
+  document.getElementById('h-date').value='';
+  buildHolidayList();
+}
+function renderCustomHolidays(){
+  const customs=S.calData.__custom||[];
+  document.getElementById('custom-h-list').innerHTML=customs.map((c,i)=>`
+    <div class="h-item h-custom" style="margin-bottom:.3rem">
+      <div class="h-dot" style="background:#8A78B8"></div>
+      <span style="flex:1;font-family:var(--font-draw);font-size:.88rem">${c.name}</span>
+      <button onclick="delCustomH(${i})" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:.85rem;padding:0 .2rem">×</button>
+    </div>`).join('')||'';
+}
+function delCustomH(i){S.calData.__custom.splice(i,1);saveState();buildHolidayList();}
+
+/* ── Day Modal ── */
+let selKey=null,isEraser=false,penColor='#2D2820',brushSz=3,drawing=false,lx=0,ly=0;
+function openDay(k,d){
+  selKey=k;
+  const ym=`${calYr} 年 ${MONTHS[calMo]} ${d} 日`;
+  document.getElementById('dmt').textContent=ym;
+  const rec=S.calData[k]||{};
+  document.getElementById('d-mood-row').innerHTML=MOODS.map(m=>
+    `<button class="mood-btn${rec.mood===m?' on':''}" onclick="pickMood(this,'${m}')">${m}</button>`).join('');
+  document.getElementById('dnote').value=rec.note||'';
+  const cv=document.getElementById('dcanvas');
+  const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+  if(rec.drawing){const img=new Image();img.onload=()=>ctx.drawImage(img,0,0);img.src=rec.drawing;}
+  openM('day-modal');
+}
+function pickMood(btn,m){document.querySelectorAll('#d-mood-row .mood-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function saveDay(){
+  const cv=document.getElementById('dcanvas');
+  const mb=document.querySelector('#d-mood-row .mood-btn.on');
+  const isNew=!S.calData[selKey]?.note&&!S.calData[selKey]?.mood;
+  S.calData[selKey]={mood:mb?mb.textContent:null,note:document.getElementById('dnote').value,drawing:cv.toDataURL()};
+  if(isNew){S.stats.calDays=(S.stats.calDays||0)+1;earnDiamond(3,'dc_cal');}
+  addLog('cal',`記錄了 ${selKey} 的日記與心情`,'📖');
+  saveState();closeM('day-modal');buildCal();checkBadges();
+}
+function initCanvas(){
+  const cv=document.getElementById('dcanvas');
+  function pos(e){
+    const r=cv.getBoundingClientRect();
+    const sx=cv.width/r.width,sy=cv.height/r.height;
+    const cx=e.touches?e.touches[0].clientX:e.clientX;
+    const cy=e.touches?e.touches[0].clientY:e.clientY;
+    return[(cx-r.left)*sx,(cy-r.top)*sy];
+  }
+  function stroke(e){
+    if(!drawing)return;
+    const ctx=cv.getContext('2d');const[x,y]=pos(e);
+    ctx.beginPath();ctx.strokeStyle=isEraser?'#fff':penColor;ctx.lineWidth=isEraser?brushSz*3.5:brushSz;
+    ctx.lineCap='round';ctx.lineJoin='round';ctx.moveTo(lx,ly);ctx.lineTo(x,y);ctx.stroke();
+    [lx,ly]=[x,y];
+  }
+  cv.addEventListener('mousedown',e=>{drawing=true;[lx,ly]=pos(e);});
+  cv.addEventListener('mousemove',stroke);
+  cv.addEventListener('mouseup',()=>drawing=false);
+  cv.addEventListener('mouseleave',()=>drawing=false);
+  cv.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;[lx,ly]=pos(e);},{passive:false});
+  cv.addEventListener('touchmove',e=>{e.preventDefault();stroke(e);},{passive:false});
+  cv.addEventListener('touchend',()=>drawing=false);
+  document.getElementById('bsize').addEventListener('input',e=>brushSz=+e.target.value);
+}
+function setPen(c,dot){penColor=c;isEraser=false;document.querySelectorAll('.cdot').forEach(d=>d.classList.remove('on'));dot.classList.add('on');document.getElementById('eraser-btn').classList.remove('on');}
+function toggleEraser(){isEraser=!isEraser;document.getElementById('eraser-btn').classList.toggle('on',isEraser);}
+function clearCvs(){const cv=document.getElementById('dcanvas');cv.getContext('2d').fillStyle='#fff';cv.getContext('2d').fillRect(0,0,cv.width,cv.height);}
+
+/* ═══════════════════════
+   TODO
+═══════════════════════ */
+let selQ_val=1; // Default: urgent+important
+function selQ(n,btn){
+  selQ_val=n;
+  document.querySelectorAll('.eis-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+const Q_SORT_ORDER={1:1,3:2,2:3,4:4}; // Q1 > Q3 > Q2 > Q4
+const Q_LABELS={1:'緊急重要',2:'重要不急',3:'緊急不重',4:'彈性處理'};
+const Q_COLORS={1:'#C8503A',2:'#6A9E6E',3:'#C8922A',4:'#A89880'};
+
+function initTodos(){
+  const today=new Date().toDateString();
+  if(S.todos.date!==today){S.todos={date:today,items:[]};saveState();}
+  renderTodos();
+}
+function addTodo(){
+  const inp=document.getElementById('todo-input');
+  const v=inp.value.trim();if(!v)return;
+  S.todos.items.push({id:Date.now(),label:v,done:false,q:selQ_val});
+  inp.value='';saveState();renderTodos();
+}
+function toggleTodo(id){
+  const item=S.todos.items.find(x=>x.id===id);if(!item)return;
+  const wasDone=item.done;item.done=!item.done;
+  if(item.done&&!wasDone){
+    S.stats.totalTodos=(S.stats.totalTodos||0)+1;
+    showAnimal(); // Only animal popup, no diamond spam
+    // Check if ALL done for challenge reward (only once per day)
+    if(S.todos.items.length>=3&&S.todos.items.every(x=>x.done)){
+      const ch=getChallenge('dc_todo');
+      if(!ch.done){completeChallengeById('dc_todo');earnDiamond(5,'');}
+    }
+  }
+  saveState();renderTodos();checkBadges();
+  updateProfileStats();
+}
+function delTodo(id){S.todos.items=S.todos.items.filter(x=>x.id!==id);saveState();renderTodos();}
+function clearDoneTodos(){S.todos.items=S.todos.items.filter(x=>!x.done);saveState();renderTodos();}
+function renderTodos(){
+  const list=document.getElementById('todo-list');
+  const items=[...S.todos.items].sort((a,b)=>{
+    // Done items to bottom
+    if(a.done!==b.done) return a.done?1:-1;
+    return (Q_SORT_ORDER[a.q||1]||5)-(Q_SORT_ORDER[b.q||1]||5);
+  });
+  if(!items.length){list.innerHTML='<div class="text-muted" style="text-align:center;padding:1rem">還沒有計畫，加入第一項吧</div>';
+    document.getElementById('todo-progress').textContent='0 / 0 完成';return;}
+  const done=items.filter(x=>x.done).length;
+  document.getElementById('todo-progress').textContent=`${done} / ${items.length} 完成`;
+  list.innerHTML=items.map(it=>{
+    const q=it.q||1;
+    return`<div class="todo-item${it.done?' done':''}">
+      <div class="tcb" onclick="toggleTodo(${it.id})">${it.done?'✓':''}</div>
+      <div class="q-dot q${q}"></div>
+      <div class="tlabel" onclick="toggleTodo(${it.id})">${it.label}</div>
+      <span style="font-family:var(--font-draw);font-size:.68rem;color:var(--ink4);white-space:nowrap;flex-shrink:0;padding:.1rem .4rem;border-radius:10px;background:rgba(0,0,0,.04)">${Q_LABELS[q]}</span>
+      <button class="tdel" onclick="delTodo(${it.id})">×</button>
+    </div>`;
+  }).join('');
+}
+
+/* Animal celebration */
+let aniTimeout;
+function showAnimal(){
+  const a=ANIMALS[Math.floor(Math.random()*ANIMALS.length)];
+  const pop=document.getElementById('animal-pop');
+  const speech=document.getElementById('a-speech');
+  const svg=document.getElementById('a-svg');
+  speech.textContent=a.praises[Math.floor(Math.random()*a.praises.length)];
+  a.draw(svg);
+  pop.style.display='flex';
+  clearTimeout(aniTimeout);
+  aniTimeout=setTimeout(()=>{pop.style.display='none';},3200);
+}
+
+/* ═══════════════════════
+   TRAVEL
+═══════════════════════ */
+let selSpot=null,cFilter='all';
+function buildCtabs(){
+  document.getElementById('ctabs').innerHTML=
+    `<button class="ctab on" onclick="filterC('all',this)">🌍 全部</button>`+
+    COUNTRIES.map(c=>`<button class="ctab" onclick="filterC('${c.id}',this)">${c.n}</button>`).join('');
+}
+function filterC(id,btn){cFilter=id;document.querySelectorAll('.ctab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');buildSpots();}
+function buildSpots(){
+  const list=cFilter==='all'?SPOTS:SPOTS.filter(s=>s.c===cFilter);
+  const g=document.getElementById('sgrid');
+  g.innerHTML=list.map(s=>{
+    const rec=S.tripData[s.id];const vis=rec&&(rec.note||(rec.photos&&rec.photos.length));
+    const cn=COUNTRIES.find(c=>c.id===s.c)?.n||'';
+    return`<div class="scard" onclick="openSpot('${s.id}')">
+      <div class="scard-illo">${getSpotSVG(s)}${vis?'<div class="scard-badge">✓ 去過了</div>':''}</div>
+      <div class="scard-body">
+        <div class="scard-ctry">${cn}</div>
+        <div class="scard-name">${s.n}</div>
+        <div class="scard-tag">${s.feat.substring(0,28)}…</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openSpot(id){
+  selSpot=SPOTS.find(s=>s.id===id);if(!selSpot)return;
+  document.getElementById('mspeech').innerHTML=`${selSpot.e} <b>${selSpot.n}</b> ✨<br>${selSpot.tip||'超棒的景點！一定要去看看！'}`;
+  document.getElementById('smt').textContent=`${selSpot.e} ${selSpot.n}`;
+  document.getElementById('simg').innerHTML=getSpotSVG(selSpot);
+  document.getElementById('s-why').textContent=selSpot.why;
+  document.getElementById('s-feat').textContent=selSpot.feat;
+  document.getElementById('s-warn').textContent=selSpot.warn;
+  const mapQ=encodeURIComponent(selSpot.n+' 景點');
+  document.getElementById('s-map').innerHTML=`<iframe width="100%" height="200" style="border:1.5px solid var(--ink4);border-radius:10px;" loading="lazy" allowfullscreen src="https://maps.google.com/maps?q=${mapQ}&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>`;
+  const rec=S.tripData[id]||{};
+  document.getElementById('tnote').value=rec.note||'';
+  document.getElementById('trip-mood').innerHTML=MOODS.map(m=>
+    `<button class="mood-btn${rec.mood===m?' on':''}" onclick="pickTMood(this,'${m}')">${m}</button>`).join('');
+  renderPhotos(rec.photos||[]);
+  stab('info',document.querySelector('.mtab'));
+  // Award dc_spot challenge diamond only once per day
+  const chDone=getChallenge('dc_spot').done;
+  if(!chDone){completeChallengeById('dc_spot');earnDiamond(2,'');}
+  saveState();checkBadges();
+  openM('spot-modal');
+}
+function renderPhotos(photos){
+  document.getElementById('pgrid').innerHTML=photos.map((p,i)=>
+    `<div class="pthumb"><img src="${p}" alt="照片${i+1}" loading="lazy"></div>`).join('');
+}
+function pickTMood(btn){document.querySelectorAll('#trip-mood .mood-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function uploadPics(e){
+  if(!selSpot)return;const files=Array.from(e.target.files);
+  const rec=S.tripData[selSpot.id]||{};const photos=rec.photos||[];let done=0;
+  files.forEach(f=>{const r=new FileReader();r.onload=ev=>{photos.push(ev.target.result);if(++done===files.length){S.tripData[selSpot.id]={...rec,photos};saveState();renderPhotos(photos);buildSpots();}};r.readAsDataURL(f);});
+  e.target.value='';
+}
+function stab(id,btn){
+  document.getElementById('tab-info').classList.toggle('hide',id!=='info');
+  document.getElementById('tab-trip').classList.toggle('hide',id!=='trip');
+  document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+}
+function saveTrip(){
+  if(!selSpot)return;const mb=document.querySelector('#trip-mood .mood-btn.on');
+  const rec=S.tripData[selSpot.id]||{};
+  S.tripData[selSpot.id]={...rec,mood:mb?mb.textContent:null,note:document.getElementById('tnote').value};
+  addLog('trip',`更新了「${selSpot.n}」的旅遊回憶`,'🗺️');
+  saveState();closeM('spot-modal');buildSpots();checkBadges();
+}
+
+/* ═══════════════════════
+   GAME ROOM
+═══════════════════════ */
+function earnDiamond(n,challengeId){
+  S.diamonds+=n;
+  document.getElementById('d-count').textContent=S.diamonds;
+  // Fly animation
+  const fly=document.createElement('div');fly.className='d-fly';
+  fly.innerHTML=`<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="10,1 18,10 10,19 2,10"/><line x1="2" y1="10" x2="18" y2="10"/><line x1="5" y1="5.5" x2="15" y2="5.5"/></svg>`;
+  fly.style.cssText=`left:${Math.random()*40+30}%;top:${Math.random()*30+30}%`;
+  document.body.appendChild(fly);setTimeout(()=>fly.remove(),1000);
+  saveState();updateProfileStats();
+}
+function getChallenge(id){
+  const today=new Date().toDateString();
+  if(S.challenges.date!==today){S.challenges={date:today,done:[]};saveState();}
+  return{done:S.challenges.done.includes(id)};
+}
+function completeChallengeById(id){
+  const today=new Date().toDateString();
+  if(S.challenges.date!==today){S.challenges={date:today,done:[]};saveState();}
+  if(!S.challenges.done.includes(id)){S.challenges.done.push(id);saveState();buildChallenges();}
+}
+function claimChallenge(id,btn){
+  const ch=getChallenge(id);if(ch.done)return;
+  const dc=DAILY_CHALLENGES.find(d=>d.id===id);if(!dc)return;
+  completeChallengeById(id);earnDiamond(dc.rew,'');buildChallenges();checkBadges();
+}
+function buildChallenges(){
+  const grid=document.getElementById('challenges-grid');
+  const today=new Date().toDateString();
+  if(S.challenges.date!==today){S.challenges={date:today,done:[]};saveState();}
+  grid.innerHTML=DAILY_CHALLENGES.map(dc=>{
+    const done=S.challenges.done.includes(dc.id);
+    const diaIco=`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="7,1 13,7 7,13 1,7"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="3.5" y1="4" x2="10.5" y2="4"/></svg>`;
+    return`<div class="challenge-card${done?' done-c':''}">
+      <div class="cc-emoji">${DC_ICONS[dc.id]||''}</div>
+      <div class="cc-title">${dc.title}</div>
+      <div style="font-family:var(--font-draw);font-size:.78rem;color:var(--ink3);margin-bottom:.2rem">${dc.desc}</div>
+      <div class="cc-rew">+${dc.rew} ${diaIco}</div>
+      <button class="cc-btn" onclick="claimChallenge('${dc.id}',this)">${done?'已完成':'領取獎勵'}</button>
+    </div>`;
+  }).join('');
+  document.getElementById('d-count').textContent=S.diamonds;
+}
+function buildBadges(){
+  const grid=document.getElementById('badges-grid');
+  const diaIco=`<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><polygon points="6.5,1 12,6.5 6.5,12 1,6.5"/><line x1="1" y1="6.5" x2="12" y2="6.5"/><line x1="3.2" y1="3.8" x2="9.8" y2="3.8"/></svg>`;
+  grid.innerHTML=BADGES.map(b=>{
+    const owned=S.badges.includes(b.id);
+    const canBuy=!owned&&S.diamonds>=b.cost;
+    return`<div class="badge-card${owned?'':' locked'}" onclick="${canBuy?`unlockBadge('${b.id}')`:owned?'':''}" title="${canBuy?'點擊兌換':owned?'已獲得':'鑽石不足'}">
+      ${b.svg}
+      <div class="badge-name">${b.n}</div>
+      <div class="badge-req">${owned?'✓ 已獲得':`需 ${b.cost} ${diaIco}`}</div>
+      <div class="badge-req" style="color:var(--ink4)">${b.sub}</div>
+    </div>`;
+  }).join('');
+}
+function unlockBadge(id){
+  const b=BADGES.find(x=>x.id===id);if(!b||S.badges.includes(id)||S.diamonds<b.cost)return;
+  S.diamonds-=b.cost;S.badges.push(id);saveState();
+  buildBadges();buildChallenges();updateProfileStats();
+  // Notification
+  const notif=document.getElementById('badge-notif');
+  document.getElementById('bn-title').textContent=`解鎖徽章：${b.n}`;
+  document.getElementById('bn-sub').textContent=b.sub;
+  notif.classList.add('show');
+  setTimeout(()=>notif.classList.remove('show'),3500);
+}
+function checkBadges(){
+  // Auto check conditions
+  const calDays=Object.keys(S.calData).filter(k=>k!=='__custom'&&S.calData[k]?.note).length;
+  const totalTodos=S.stats.totalTodos||0;
+  const tripCount=Object.keys(S.tripData).filter(k=>S.tripData[k]?.note).length;
+  const artCount=S.artViewed.length;
+  const moodsUsed=new Set(Object.values(S.calData).map(r=>r?.mood).filter(Boolean)).size;
+  if(S.diamonds>=1&&!S.badges.includes('first_step')){}// Will need manual click
+  if(calDays>=7&&!S.badges.includes('diary_fan')){}
+  buildBadges();
+}
+
+/* ═══════════════════════
+   PROFILE
+═══════════════════════ */
+function loadProfile(){
+  const p=S.profile||{};
+  ['name','nick','birthday','blood','zodiac','persona','hobby','motto','dream','mood'].forEach(k=>{
+    const el=document.getElementById('pf-'+k);if(el)el.value=p[k]||'';
+  });
+  document.getElementById('avatar-display').textContent=p.avatar||'🐱';
+  updateProfileStats();
+}
+function saveProfile(){
+  ['name','nick','birthday','blood','zodiac','persona','hobby','motto','dream','mood'].forEach(k=>{
+    const el=document.getElementById('pf-'+k);if(el)S.profile[k]=el.value;
+  });
+  saveState();
+  // Mini feedback
+  const btn=event.target;const orig=btn.innerHTML;
+  btn.textContent='已儲存';setTimeout(()=>{btn.innerHTML=orig;},1800);
+}
+function setAvatar(em){S.profile.avatar=em;saveState();document.getElementById('avatar-display').textContent=em;}
+function updateProfileStats(){
+  const calDays=Object.keys(S.calData).filter(k=>k!=='__custom'&&(S.calData[k]?.note||S.calData[k]?.mood)).length;
+  const tripCount=Object.keys(S.tripData).filter(k=>S.tripData[k]?.note||S.tripData[k]?.photos?.length).length;
+  const useSince=S.stats.useSince||new Date().toDateString();
+  const daysSince=Math.round((new Date()-new Date(useSince))/86400000)+1;
+  document.getElementById('st-cal').textContent=calDays;
+  document.getElementById('st-gems').textContent=S.diamonds;
+  document.getElementById('st-badge').textContent=S.badges.length;
+  document.getElementById('st-spot').textContent=tripCount;
+  document.getElementById('st-todo').textContent=S.stats.totalTodos||0;
+  document.getElementById('st-days').textContent=daysSince;
+}
+
+/* ═══════════════════════
+   ART EVENTS
+═══════════════════════ */
+const ART_CATS=['全部','展覽','表演','節慶','戶外','電影','音樂','藝術博覽'];
+let artFilter='全部';
+function buildArtFilter(){
+  document.getElementById('art-filter').innerHTML=ART_CATS.map(c=>
+    `<button class="ctab${c===artFilter?' on':''}" onclick="filterArt('${c}',this)">${c}</button>`).join('');
+}
+function filterArt(c,btn){
+  artFilter=c;document.querySelectorAll('#art-filter .ctab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');renderEvents();
+}
+const ART_CAT_ICONS={
+  '展覽':`<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="24" height="18" rx="2"/><line x1="4" y1="24" x2="28" y2="24"/><line x1="10" y1="24" x2="10" y2="28"/><line x1="22" y1="24" x2="22" y2="28"/><line x1="7" y1="28" x2="25" y2="28"/><rect x="11" y="11" width="10" height="7" rx="1" fill="rgba(90,143,174,.15)"/></svg>`,
+  '表演':`<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4,26 Q16,18 28,26"/><path d="M4,26 Q4,6 16,10 Q28,6 28,26"/><circle cx="16" cy="12" r="3.5"/></svg>`,
+  '節慶':`<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16,6 Q20,14 28,14 Q22,18 24,26 Q18,22 16,26 Q14,22 8,26 Q10,18 4,14 Q12,14 16,6 Z"/></svg>`,
+  '戶外':`<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4,26 L12,12 L20,22 L24,16 L28,26 Z" fill="rgba(106,158,110,.15)"/><circle cx="22" cy="9" r="3.5"/><line x1="22" y1="5" x2="22" y2="2.5"/><line x1="25" y1="6.5" x2="27" y2="4.5"/><line x1="26" y1="9" x2="28.5" y2="9"/></svg>`,
+  '電影':`<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="24" height="16" rx="2"/><line x1="4" y1="12" x2="28" y2="12"/><line x1="4" y1="20" x2="28" y2="20"/><line x1="9" y1="8" x2="9" y2="12"/><line x1="16" y1="8" x2="16" y2="12"/><line x1="23" y1="8" x2="23" y2="12"/><line x1="9" y1="20" x2="9" y2="24"/><line x1="16" y1="20" x2="16" y2="24"/><line x1="23" y1="20" x2="23" y2="24"/></svg>`,
+  '音樂':`<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12,22 L12,10 L26,7 L26,19"/><circle cx="9.5" cy="22" r="3.5"/><circle cx="23.5" cy="19" r="3.5"/><line x1="12" y1="14" x2="26" y2="11"/></svg>`,
+  '藝術博覽':`<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#2D2820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="10" height="10" rx="1.5" fill="rgba(200,80,58,.1)"/><rect x="17" y="5" width="10" height="10" rx="1.5" fill="rgba(106,158,110,.1)"/><rect x="5" y="17" width="10" height="10" rx="1.5" fill="rgba(90,143,174,.1)"/><rect x="17" y="17" width="10" height="10" rx="1.5" fill="rgba(200,146,42,.1)"/></svg>`,
+};
+function renderEvents(){
+  const list=artFilter==='全部'?EVENTS:EVENTS.filter(e=>e.cat===artFilter);
+  const calIco=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="1" y="1.5" width="10" height="9" rx="1.5"/><line x1="4" y1=".5" x2="4" y2="3"/><line x1="8" y1=".5" x2="8" y2="3"/><line x1="1" y1="4.5" x2="11" y2="4.5"/></svg>`;
+  const pinIco=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M6,1 C4,1 2.5,2.5 2.5,4.5 C2.5,7.5 6,11 6,11 C6,11 9.5,7.5 9.5,4.5 C9.5,2.5 8,1 6,1 Z"/><circle cx="6" cy="4.5" r="1.5" fill="currentColor" stroke="none"/></svg>`;
+  document.getElementById('events-grid').innerHTML=list.map(ev=>{
+    const added=S.artViewed.includes(ev.id);
+    return`<div class="event-card">
+      <div class="ec-cat">${ev.cat}</div>
+      <div class="ec-emoji">${ART_CAT_ICONS[ev.cat]||''}</div>
+      <div class="ec-title">${ev.title}</div>
+      <div class="ec-date">${calIco} ${ev.date}</div>
+      <div class="ec-loc">${pinIco} ${ev.loc}</div>
+      <div class="ec-desc">${ev.desc}</div>
+      <button class="ec-go" style="${added?'border-color:var(--green);color:var(--green)':''}" onclick="toggleArtEvent('${ev.id}',this)">
+        ${added?'已加入清單（點擊取消）':'加入我的清單'}
+      </button>
+    </div>`;
+  }).join('');
+}
+function toggleArtEvent(id){
+  const wasAdded=S.artViewed.includes(id);
+  if(wasAdded){
+    // Remove
+    S.artViewed=S.artViewed.filter(x=>x!==id);
+  } else {
+    // Add - earn diamond only first time ever
+    S.artViewed.push(id);
+    earnDiamond(2,'dc_art');
+  }
+  saveState();renderEvents();checkBadges();
+}
+
+/* ═══════════════════════
+   MODALS
+═══════════════════════ */
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
+});
+
+/* ═══════════════════════
+   TAB NAVIGATION
+═══════════════════════ */
+function gotoTab(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id+'-view').classList.add('active');
+  if(btn)btn.classList.add('active');
+  else{// Find correct button
+    const idx={cal:0,todo:1,travel:2,game:3,profile:4,art:5}[id];
+    document.querySelectorAll('.tab-btn')[idx]?.classList.add('active');
+  }
+}
+
+/* ═══════════════════════
+   NAV TOGGLE
+═══════════════════════ */
+function toggleNav(btn){
+  const nav=document.getElementById('tab-nav');
+  const collapsed=nav.classList.toggle('collapsed');
+  btn.textContent=collapsed?'▼ 展開':'▲ 收起';
+}
+
+/* ═══════════════════════
+   RESET
+═══════════════════════ */
+function resetApp(){
+  if(!confirm('⚠️ 確定要重置所有資料嗎？\n日記、計畫、景點紀錄、鑽石和徽章都會清空，無法還原。'))return;
+  localStorage.removeItem('bs2_state');
+  location.reload();
+}
+
+/* ═══════════════════════
+   INIT
+═══════════════════════ */
+buildCal();
+buildCtabs();buildSpots();
+buildChallenges();buildBadges();
+buildArtFilter();renderEvents();
+initTodos();initCanvas();
+loadProfile();
+</script>
+</body>
+</html>
