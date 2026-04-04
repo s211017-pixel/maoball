@@ -882,7 +882,7 @@ header{
           <div class="pf-label">介面字體大小</div>
           <div style="display:flex;gap:.8rem;align-items:center;padding:0 .5rem">
             <span style="font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3)">小</span>
-            <input type="range" id="pf-fontsize" min="0.85" max="1.3" step="0.05" value="1" style="flex:1;accent-color:var(--ink)">
+            <input type="range" id="pf-fontsize" min="0.85" max="1.3" step="0.05" value="1" style="flex:1;accent-color:var(--ink)" oninput="document.documentElement.style.setProperty('--fs', this.value)">
             <span style="font-family:var(--font-draw);font-size:calc(1.2rem * var(--fs));color:var(--ink3)">大</span>
           </div>
         </div>
@@ -1855,12 +1855,16 @@ function loadProfile(){
     const el=document.getElementById('pf-'+k);if(el)el.value=p[k]||'';
   });
   document.getElementById('avatar-display').textContent=p.avatar||'🐱';
+  const fsInput = document.getElementById('pf-fontsize');
+  if(fsInput) fsInput.value = p.fontSize || 1;
   updateProfileStats();
 }
 function saveProfile(){
   ['name','nick','birthday','blood','zodiac','persona','hobby','motto','dream','mood'].forEach(k=>{
     const el=document.getElementById('pf-'+k);if(el)S.profile[k]=el.value;
   });
+  const fsInput = document.getElementById('pf-fontsize');
+  if(fsInput) S.profile.fontSize = fsInput.value;
   saveState();
   // Mini feedback
   const btn=event.target;const orig=btn.innerHTML;
@@ -1951,7 +1955,7 @@ function gotoTab(id,btn){
   document.getElementById(id+'-view').classList.add('active');
   if(btn)btn.classList.add('active');
   else{// Find correct button
-    const idx={cal:0,todo:1,travel:2,game:3,profile:4,art:5}[id];
+    const idx={cal:0,todo:1,travel:2,game:3,profile:4,art:5,history:6}[id];
     document.querySelectorAll('.tab-btn')[idx]?.classList.add('active');
   }
 }
@@ -1982,7 +1986,7 @@ buildCtabs();buildSpots();
 buildChallenges();buildBadges();
 buildArtFilter();renderEvents();
 initTodos();initCanvas();
-loadProfile();
+loadProfile();renderHistory();
 </script>
 </body>
 </html>
