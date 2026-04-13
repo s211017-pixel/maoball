@@ -617,73 +617,6 @@ header{
 .ico-sm{display:inline-block;vertical-align:-3px;flex-shrink:0;pointer-events:none}
 /* ensure sec-title icons align */
 .sec-title .ico,.sec-title .ico-sm{vertical-align:-2px}
-
-/* ═══════════════════════════════
-   THEMES (CALENDAR ONLY)
-═══════════════════════════════ */
-/* Cat Theme */
-.theme-cat {
-  --ink: #4E3E32; --ink2: #7D6B5D; --ink3: #A99A8F; --ink4: #D2C4BB;
-  --paper: #FFF4EC; --paper2: #FDE8D4; --paper3: #FADBBF;
-  --cream: #FFFBF7;
-}
-.theme-cat .cal-cell:hover {
-  background: var(--paper2);
-}
-.theme-cat .cal-cell.today {
-  position: relative;
-}
-.theme-cat .cal-cell.today::before {
-  content:''; position:absolute; top:-6px; left:8px; width:6px; height:6px; border-radius:50% 50% 0 0; background:var(--ink); transform:rotate(-20deg);
-}
-.theme-cat .cal-cell.today::after {
-  content:''; position:absolute; top:-6px; right:8px; width:6px; height:6px; border-radius:50% 50% 0 0; background:var(--ink); transform:rotate(20deg);
-}
-.theme-cat .cal-cell.has-holiday {
-  box-shadow:inset 0 0 0 2px var(--hcol, rgba(232, 128, 58, 0.4));
-}
-.theme-cat .cal-cell.today.has-holiday {
-  box-shadow:inset 0 0 0 2px var(--hcol, rgba(232, 128, 58, 0.55)),inset 0 0 0 999px var(--ink);
-}
-
-/* Succulent Theme */
-.theme-succulent {
-  --ink: #2C4A3B; --ink2: #4D7662; --ink3: #82A995; --ink4: #BBD5C9;
-  --paper: #F3F8F5; --paper2: #E1EFE7; --paper3: #CFE6DA;
-  --cream: #FAFCFB;
-}
-.theme-succulent .cal-cell {
-  border-radius: 50% 5px 50% 5px;
-}
-.theme-succulent .cal-cell.has-holiday {
-  box-shadow:inset 0 0 0 2px var(--hcol, rgba(77, 118, 98, 0.4));
-}
-.theme-succulent .cal-cell.today.has-holiday {
-  box-shadow:inset 0 0 0 2px var(--hcol, rgba(77, 118, 98, 0.55)),inset 0 0 0 999px var(--ink);
-}
-
-/* Color Theme */
-.theme-color {
-  --ink: #5C4A6B; --ink2: #847291; --ink3: #B3A4C0; --ink4: #DED3E8;
-  --paper: #F8F5FA; --paper2: #F0E8F5; --paper3: #E6DAF0;
-  --cream: #FCFBFE;
-}
-@keyframes bgGradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.theme-color .cal-cell.today {
-  background: linear-gradient(120deg, #FAD0C4, #FFD1FF, #B9D2FF);
-  background-size: 200% 200%;
-  animation: bgGradient 5s ease infinite;
-  color: var(--ink);
-  font-weight: 700;
-  border-color: #FAD0C4;
-}
-.theme-color .cal-cell.today.has-holiday {
-  box-shadow:inset 0 0 0 2px var(--hcol, rgba(255, 209, 255, 0.8)),inset 0 0 0 999px rgba(255,255,255,0.4);
-}
 </style>
 <script>
   // 即時載入字體大小設定以避免畫面閃爍
@@ -726,7 +659,7 @@ header{
      1. CALENDAR VIEW
 ══════════════════════════════════ -->
 <div class="view active" id="cal-view">
-  <div class="cal-wrap" id="cal-wrap">
+  <div class="cal-wrap">
     <!-- Main Calendar (primary, centered) -->
     <div class="hcard">
       <div class="cal-nav" style="position:relative">
@@ -896,10 +829,6 @@ header{
   <div class="sec-title" style="font-size:1.1rem;margin-top:1rem"><svg class="ico-sm" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4,2 L12,2 L12,8.5 C12,11 4,11 4,8.5 Z"/><path d="M2,2 L4,2 C4,5 2,5.5 2,3.5 Z"/><path d="M14,2 L12,2 C12,5 14,5.5 14,3.5 Z"/><line x1="8" y1="11" x2="8" y2="13"/><line x1="5" y1="13" x2="11" y2="13"/></svg> 徽章收藏</div>
   <div class="text-muted" style="margin-bottom:.85rem">收集足夠鑽石即可兌換徽章！</div>
   <div class="badges-grid" id="badges-grid"></div>
-
-  <div class="sec-title" style="font-size:1.1rem;margin-top:2rem"><svg class="ico-sm" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M2,8 L14,8 M8,2 L8,14"/></svg> 月曆主題小舖</div>
-  <div class="text-muted" style="margin-bottom:.85rem">兌換不同風格的月曆，讓手帳更有趣！</div>
-  <div class="challenges-grid" id="themes-grid"></div>
 </div>
 
 <!-- ══════════════════════════════════
@@ -953,7 +882,7 @@ header{
           <div class="pf-label">介面字體大小</div>
           <div style="display:flex;gap:.8rem;align-items:center;padding:0 .5rem">
             <span style="font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3)">小</span>
-            <input type="range" id="pf-fontsize" min="0.85" max="1.3" step="0.05" value="1" style="flex:1;accent-color:var(--ink)" oninput="document.documentElement.style.setProperty('--fs', this.value)">
+            <input type="range" id="pf-fontsize" min="0.85" max="1.3" step="0.05" value="1" style="flex:1;accent-color:var(--ink)">
             <span style="font-family:var(--font-draw);font-size:calc(1.2rem * var(--fs));color:var(--ink3)">大</span>
           </div>
         </div>
@@ -1473,8 +1402,7 @@ function loadState(){return JSON.parse(localStorage.getItem('bs2_state')||'null'
   diamonds:0,badges:[],challenges:{date:'',done:[]},
   calData:{},tripData:{},todos:{date:'',items:[]},artViewed:[],
   stats:{calDays:0,totalTodos:0,useSince:new Date().toDateString()},
-  history:[],
-  themes:{unlocked:['default'],active:'default'}
+  history:[]
 };}
 function saveState(){
   localStorage.setItem('bs2_state',JSON.stringify(S));
@@ -1482,15 +1410,12 @@ function saveState(){
 }
 let S=loadState();
 if(!S.history) S.history=[];
-if(!S.themes) S.themes={unlocked:['default'],active:'default'};
 
 window.loadFromCloud=function(cloudS){
   S=cloudS;if(!S.history)S.history=[];
-  if(!S.themes) S.themes={unlocked:['default'],active:'default'};
   localStorage.setItem('bs2_state',JSON.stringify(S));
   buildCal();buildSpots();buildChallenges();buildBadges();
   renderEvents();initTodos();loadProfile();renderHistory();
-  buildThemes();renderTheme();
 };
 
 function addLog(type,desc,icon){
@@ -1742,10 +1667,21 @@ function renderTodos(){
   document.getElementById('todo-progress').textContent=`${done} / ${items.length} 完成`;
   list.innerHTML=items.map(it=>{
     const q=it.q||1;
+    let tStr = '';
+    if(it.id && it.id > 1000000000000) { // 確保 id 是時間戳
+      const m = Math.floor((Date.now() - it.id) / 60000);
+      if(m < 1) tStr = '剛剛';
+      else if(m < 60) tStr = m + ' 分鐘前';
+      else if(m < 1440) tStr = Math.floor(m/60) + ' 小時前';
+      else tStr = Math.floor(m/1440) + ' 天前';
+    }
     return`<div class="todo-item${it.done?' done':''}">
       <div class="tcb" onclick="toggleTodo(${it.id})">${it.done?'✓':''}</div>
       <div class="q-dot q${q}"></div>
-      <div class="tlabel" onclick="toggleTodo(${it.id})">${it.label}</div>
+      <div class="tlabel" onclick="toggleTodo(${it.id})">
+        ${it.label}
+        ${tStr ? `<div style="font-size:0.65rem;color:var(--ink3);margin-top:0.2rem;">⌚ ${tStr}</div>` : ''}
+      </div>
       <span style="font-family:var(--font-draw);font-size:.68rem;color:var(--ink4);white-space:nowrap;flex-shrink:0;padding:.1rem .4rem;border-radius:10px;background:rgba(0,0,0,.04)">${Q_LABELS[q]}</span>
       <button class="tdel" onclick="delTodo(${it.id})">×</button>
     </div>`;
@@ -1921,70 +1857,6 @@ function checkBadges(){
   buildBadges();
 }
 
-/* ── THEMES ── */
-const THEMES=[
-  {id:'default',n:'經典原味',desc:'手帳的最初感動',cost:0,icon:'📔'},
-  {id:'cat',n:'貓咪風格',desc:'溫暖的肉球與耳朵',cost:15,icon:'🐾'},
-  {id:'succulent',n:'多肉植物',desc:'療癒的綠意與圓潤葉片',cost:15,icon:'🌿'},
-  {id:'color',n:'夢幻色彩',desc:'五彩斑斕的漸層魔術',cost:25,icon:'🌈'}
-];
-
-function buildThemes(){
-  const grid=document.getElementById('themes-grid');
-  if(!grid)return;
-  const diaIco=`<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><polygon points="6.5,1 12,6.5 6.5,12 1,6.5"/><line x1="1" y1="6.5" x2="12" y2="6.5"/><line x1="3.2" y1="3.8" x2="9.8" y2="3.8"/></svg>`;
-  grid.innerHTML=THEMES.map(t=>{
-    const owned=S.themes.unlocked.includes(t.id);
-    const active=S.themes.active===t.id;
-    const canBuy=!owned&&S.diamonds>=t.cost;
-    let btnHtml='';
-    if(active){
-      btnHtml=`<button class="cc-btn" style="background:var(--green)">已套用</button>`;
-    } else if(owned){
-      btnHtml=`<button class="cc-btn" style="background:var(--ink)" onclick="equipTheme('${t.id}')">套用</button>`;
-    } else {
-      btnHtml=`<button class="cc-btn" style="${canBuy?'':'opacity:0.5'}" onclick="unlockTheme('${t.id}')">${t.cost} ${diaIco} 兌換</button>`;
-    }
-    
-    return`<div class="challenge-card" style="${active?'border-color:var(--ink)':''}">
-      <div class="cc-emoji" style="font-size:1.8rem">${t.icon}</div>
-      <div class="cc-title">${t.n}</div>
-      <div style="font-family:var(--font-draw);font-size:.78rem;color:var(--ink3);margin-bottom:.5rem">${t.desc}</div>
-      ${btnHtml}
-    </div>`;
-  }).join('');
-}
-
-function unlockTheme(id){
-  const t=THEMES.find(x=>x.id===id);if(!t||S.themes.unlocked.includes(id)||S.diamonds<t.cost)return;
-  S.diamonds-=t.cost;S.themes.unlocked.push(id);saveState();
-  buildThemes();buildChallenges();buildBadges();updateProfileStats();
-  document.getElementById('d-count').textContent=S.diamonds;
-  const notif=document.getElementById('badge-notif');
-  document.getElementById('bn-title').textContent=`解鎖主題：${t.n}`;
-  document.getElementById('bn-sub').textContent=`去月曆看看新風格吧！`;
-  notif.classList.add('show');
-  setTimeout(()=>notif.classList.remove('show'),3500);
-}
-
-function equipTheme(id){
-  const t=THEMES.find(x=>x.id===id);if(!t||!S.themes.unlocked.includes(id))return;
-  S.themes.active=id;
-  saveState();
-  renderTheme();
-  buildThemes();
-  addLog('theme', '切換了月曆風格：' + t.n, '🎨');
-}
-
-function renderTheme(){
-  const w=document.getElementById('cal-wrap');
-  if(!w)return;
-  w.className='cal-wrap'; 
-  if(S.themes.active&&S.themes.active!=='default'){
-    w.classList.add('theme-'+S.themes.active);
-  }
-}
-
 /* ═══════════════════════
    PROFILE
 ═══════════════════════ */
@@ -1994,16 +1866,12 @@ function loadProfile(){
     const el=document.getElementById('pf-'+k);if(el)el.value=p[k]||'';
   });
   document.getElementById('avatar-display').textContent=p.avatar||'🐱';
-  const fsInput = document.getElementById('pf-fontsize');
-  if(fsInput) fsInput.value = p.fontSize || 1;
   updateProfileStats();
 }
 function saveProfile(){
   ['name','nick','birthday','blood','zodiac','persona','hobby','motto','dream','mood'].forEach(k=>{
     const el=document.getElementById('pf-'+k);if(el)S.profile[k]=el.value;
   });
-  const fsInput = document.getElementById('pf-fontsize');
-  if(fsInput) S.profile.fontSize = fsInput.value;
   saveState();
   // Mini feedback
   const btn=event.target;const orig=btn.innerHTML;
@@ -2094,7 +1962,7 @@ function gotoTab(id,btn){
   document.getElementById(id+'-view').classList.add('active');
   if(btn)btn.classList.add('active');
   else{// Find correct button
-    const idx={cal:0,todo:1,travel:2,game:3,profile:4,art:5,history:6}[id];
+    const idx={cal:0,todo:1,travel:2,game:3,profile:4,art:5}[id];
     document.querySelectorAll('.tab-btn')[idx]?.classList.add('active');
   }
 }
@@ -2122,11 +1990,10 @@ function resetApp(){
 ═══════════════════════ */
 buildCal();
 buildCtabs();buildSpots();
-buildChallenges();buildBadges();buildThemes();
+buildChallenges();buildBadges();
 buildArtFilter();renderEvents();
 initTodos();initCanvas();
-loadProfile();renderHistory();
-renderTheme();
+loadProfile();
 </script>
 </body>
 </html>
