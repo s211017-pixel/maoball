@@ -1680,7 +1680,7 @@ function renderTodos(){
       <div class="q-dot q${q}"></div>
       <div class="tlabel" onclick="toggleTodo(${it.id})">
         ${it.label}
-        ${tStr ? `<div style="font-size:0.65rem;color:var(--ink3);margin-top:0.2rem;">⌚ ${tStr}</div>` : ''}
+        ${tStr ? `<div style="font-size:0.65rem;color:var(--ink3);margin-top:0.25rem;display:flex;align-items:center;gap:0.25rem;"><svg class="ico-sm" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><polyline points="8,3.5 8,8 11.5,10.5"/></svg>${tStr}</div>` : ''}
       </div>
       <span style="font-family:var(--font-draw);font-size:.68rem;color:var(--ink4);white-space:nowrap;flex-shrink:0;padding:.1rem .4rem;border-radius:10px;background:rgba(0,0,0,.04)">${Q_LABELS[q]}</span>
       <button class="tdel" onclick="delTodo(${it.id})">×</button>
