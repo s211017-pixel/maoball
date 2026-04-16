@@ -617,6 +617,73 @@ header{
 .ico-sm{display:inline-block;vertical-align:-3px;flex-shrink:0;pointer-events:none}
 /* ensure sec-title icons align */
 .sec-title .ico,.sec-title .ico-sm{vertical-align:-2px}
+
+/* ═══════════════════════════════
+   THEMES (CALENDAR ONLY)
+═══════════════════════════════ */
+/* Cat Theme */
+.theme-cat {
+  --ink: #4E3E32; --ink2: #7D6B5D; --ink3: #A99A8F; --ink4: #D2C4BB;
+  --paper: #FFF4EC; --paper2: #FDE8D4; --paper3: #FADBBF;
+  --cream: #FFFBF7;
+}
+.theme-cat .cal-cell:hover {
+  background: var(--paper2);
+}
+.theme-cat .cal-cell.today {
+  position: relative;
+}
+.theme-cat .cal-cell.today::before {
+  content:''; position:absolute; top:-6px; left:8px; width:6px; height:6px; border-radius:50% 50% 0 0; background:var(--ink); transform:rotate(-20deg);
+}
+.theme-cat .cal-cell.today::after {
+  content:''; position:absolute; top:-6px; right:8px; width:6px; height:6px; border-radius:50% 50% 0 0; background:var(--ink); transform:rotate(20deg);
+}
+.theme-cat .cal-cell.has-holiday {
+  box-shadow:inset 0 0 0 2px var(--hcol, rgba(232, 128, 58, 0.4));
+}
+.theme-cat .cal-cell.today.has-holiday {
+  box-shadow:inset 0 0 0 2px var(--hcol, rgba(232, 128, 58, 0.55)),inset 0 0 0 999px var(--ink);
+}
+
+/* Succulent Theme */
+.theme-succulent {
+  --ink: #2C4A3B; --ink2: #4D7662; --ink3: #82A995; --ink4: #BBD5C9;
+  --paper: #F3F8F5; --paper2: #E1EFE7; --paper3: #CFE6DA;
+  --cream: #FAFCFB;
+}
+.theme-succulent .cal-cell {
+  border-radius: 50% 5px 50% 5px;
+}
+.theme-succulent .cal-cell.has-holiday {
+  box-shadow:inset 0 0 0 2px var(--hcol, rgba(77, 118, 98, 0.4));
+}
+.theme-succulent .cal-cell.today.has-holiday {
+  box-shadow:inset 0 0 0 2px var(--hcol, rgba(77, 118, 98, 0.55)),inset 0 0 0 999px var(--ink);
+}
+
+/* Color Theme */
+.theme-color {
+  --ink: #5C4A6B; --ink2: #847291; --ink3: #B3A4C0; --ink4: #DED3E8;
+  --paper: #F8F5FA; --paper2: #F0E8F5; --paper3: #E6DAF0;
+  --cream: #FCFBFE;
+}
+@keyframes bgGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.theme-color .cal-cell.today {
+  background: linear-gradient(120deg, #FAD0C4, #FFD1FF, #B9D2FF);
+  background-size: 200% 200%;
+  animation: bgGradient 5s ease infinite;
+  color: var(--ink);
+  font-weight: 700;
+  border-color: #FAD0C4;
+}
+.theme-color .cal-cell.today.has-holiday {
+  box-shadow:inset 0 0 0 2px var(--hcol, rgba(255, 209, 255, 0.8)),inset 0 0 0 999px rgba(255,255,255,0.4);
+}
 </style>
 <script>
   // 即時載入字體大小設定以避免畫面閃爍
@@ -642,14 +709,16 @@ header{
 <header>
   <div class="header-row1">
     <div class="logo"><svg class="ico" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="11" cy="15.5" rx="5.5" ry="4"/><circle cx="5" cy="8.5" r="2.5"/><circle cx="9" cy="6.5" r="2.5"/><circle cx="13" cy="6.5" r="2.5"/><circle cx="17" cy="8.5" r="2.5"/></svg> 毛球手帳 <span>MaoBall</span></div>
-    <button class="nav-toggle" onclick="toggleNav(this)" title="收起／展開功能欄">▲ 收起</button>
+    <div style="display:flex;gap:0.4rem;align-items:center;">
+      <button onclick="openProfileModal()" id="header-avatar-btn" style="background:var(--paper2);border:1.5px solid var(--ink4);border-radius:50%;width:32px;height:32px;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 var(--ink4);transition:transform 0.2s;">🐱</button>
+      <button class="nav-toggle" onclick="toggleNav(this)" title="收起／展開功能欄">▲ 收起</button>
+    </div>
   </div>
   <nav class="tab-nav" id="tab-nav">
     <button class="tab-btn active" onclick="gotoTab('cal',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="14" height="13" rx="2"/><line x1="6" y1="1.5" x2="6" y2="4.5"/><line x1="12" y1="1.5" x2="12" y2="4.5"/><line x1="2" y1="7" x2="16" y2="7"/><circle cx="6" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="11" r="1" fill="currentColor" stroke="none"/></svg> 月曆</button>
     <button class="tab-btn" onclick="gotoTab('todo',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2.5,5.5 5,8 8.5,3.5"/><line x1="11" y1="5.5" x2="16" y2="5.5"/><line x1="2.5" y1="11" x2="16" y2="11"/><line x1="2.5" y1="15.5" x2="13" y2="15.5"/></svg> 計畫</button>
     <button class="tab-btn" onclick="gotoTab('travel',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9,2 L2.5,16 L9,13.5 L15.5,16 Z"/><line x1="9" y1="2" x2="9" y2="13.5"/><line x1="3.5" y1="11.5" x2="14.5" y2="11.5"/></svg> 旅遊</button>
     <button class="tab-btn" onclick="gotoTab('game',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="8" rx="3.5"/><line x1="6.5" y1="8.5" x2="6.5" y2="12.5"/><line x1="4.5" y1="10.5" x2="8.5" y2="10.5"/><circle cx="13" cy="9.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="13" cy="12.5" r="1.1" fill="currentColor" stroke="none"/></svg> 遊戲室</button>
-    <button class="tab-btn" onclick="gotoTab('profile',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6.5" r="3.5"/><path d="M2,17 C2,12 16,12 16,17"/></svg> 我的</button>
     <button class="tab-btn" onclick="gotoTab('art',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9,2.5 C5.5,2.5 2.5,5.5 2.5,9 C2.5,12.5 5.4,15.5 9,15.5 C10,15.5 10.8,14.7 10.8,13.8 C10.8,13.4 10.6,13 10.6,12.6 C10.6,11.8 11.2,11.2 12,11.2 L13.6,11.2 C15.2,11.2 15.5,10 15.5,9 C15.5,5.5 12.5,2.5 9,2.5"/><circle cx="5.8" cy="7.5" r="1.2" fill="#C8503A" stroke="none"/><circle cx="8.5" cy="5.5" r="1.2" fill="#6A9E6E" stroke="none"/><circle cx="11.5" cy="6.5" r="1.2" fill="#5A8FAE" stroke="none"/></svg> 藝文</button>
     <button class="tab-btn" onclick="gotoTab('history',this)"><svg class="ico" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="6"/><polyline points="9,5 9,9 11.5,11.5"/></svg> 歷程</button>
   </nav>
@@ -829,88 +898,15 @@ header{
   <div class="sec-title" style="font-size:1.1rem;margin-top:1rem"><svg class="ico-sm" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4,2 L12,2 L12,8.5 C12,11 4,11 4,8.5 Z"/><path d="M2,2 L4,2 C4,5 2,5.5 2,3.5 Z"/><path d="M14,2 L12,2 C12,5 14,5.5 14,3.5 Z"/><line x1="8" y1="11" x2="8" y2="13"/><line x1="5" y1="13" x2="11" y2="13"/></svg> 徽章收藏</div>
   <div class="text-muted" style="margin-bottom:.85rem">收集足夠鑽石即可兌換徽章！</div>
   <div class="badges-grid" id="badges-grid"></div>
+
+  <div class="sec-title" style="font-size:1.1rem;margin-top:2rem"><svg class="ico-sm" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M2,8 L14,8 M8,2 L8,14"/></svg> 月曆主題小舖</div>
+  <div class="text-muted" style="margin-bottom:.85rem">兌換不同風格的月曆，讓手帳更有趣！</div>
+  <div class="challenges-grid" id="themes-grid"></div>
 </div>
 
 <!-- ══════════════════════════════════
      5. PROFILE VIEW
-══════════════════════════════════ -->
-<div class="view" id="profile-view">
-  <div class="sec-title"><svg class="ico-sm" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="4"/><path d="M2,18 C2,13 18,13 18,18"/></svg> 我的個人檔案</div>
-  <div class="hcard" style="margin-bottom:1.25rem">
-    <div class="profile-wrap">
-      <div class="profile-avatar">
-        <div class="avatar-ring" id="avatar-display">🐱</div>
-        <div style="display:flex;gap:.3rem;flex-wrap:wrap;justify-content:center">
-          <span onclick="setAvatar('🐱')" style="cursor:pointer;font-size:1.3rem">🐱</span>
-          <span onclick="setAvatar('🦊')" style="cursor:pointer;font-size:1.3rem">🦊</span>
-          <span onclick="setAvatar('🐼')" style="cursor:pointer;font-size:1.3rem">🐼</span>
-          <span onclick="setAvatar('🐨')" style="cursor:pointer;font-size:1.3rem">🐨</span>
-          <span onclick="setAvatar('🦁')" style="cursor:pointer;font-size:1.3rem">🦁</span>
-          <span onclick="setAvatar('🐸')" style="cursor:pointer;font-size:1.3rem">🐸</span>
-        </div>
-      </div>
-      <div class="profile-form" id="profile-form">
-        <div class="pf-group"><div class="pf-label">名字</div><input class="pf-input" id="pf-name" placeholder="你的名字"></div>
-        <div class="pf-group"><div class="pf-label">綽號 / 暱稱</div><input class="pf-input" id="pf-nick" placeholder="大家怎麼叫你？"></div>
-        <div class="pf-group"><div class="pf-label">生日</div><input class="pf-input" type="date" id="pf-birthday"></div>
-        <div class="pf-group">
-          <div class="pf-label">血型</div>
-          <select class="pf-select" id="pf-blood">
-            <option value="">選擇血型</option>
-            <option>A 型</option><option>B 型</option><option>O 型</option><option>AB 型</option>
-          </select>
-        </div>
-        <div class="pf-group">
-          <div class="pf-label">星座</div>
-          <select class="pf-select" id="pf-zodiac">
-            <option value="">選擇星座</option>
-            <option>牡羊座 ♈</option><option>金牛座 ♉</option><option>雙子座 ♊</option>
-            <option>巨蟹座 ♋</option><option>獅子座 ♌</option><option>處女座 ♍</option>
-            <option>天秤座 ♎</option><option>天蠍座 ♏</option><option>射手座 ♐</option>
-            <option>摩羯座 ♑</option><option>水瓶座 ♒</option><option>雙魚座 ♓</option>
-          </select>
-        </div>
-        <div class="pf-group">
-          <div class="pf-label">個性標籤</div>
-          <input class="pf-input" id="pf-persona" placeholder="例如：INFJ、宅宅、話癆">
-        </div>
-        <div class="pf-group full"><div class="pf-label">興趣與愛好</div><input class="pf-input" id="pf-hobby" placeholder="閱讀、旅行、烘焙、打電動…"></div>
-        <div class="pf-group full"><div class="pf-label">座右銘</div><input class="pf-input" id="pf-motto" placeholder="你的人生信條是…"></div>
-        <div class="pf-group full"><div class="pf-label">夢想清單 ✨</div><textarea class="pf-input" id="pf-dream" rows="2" placeholder="這輩子一定要做的事…"></textarea></div>
-        <div class="pf-group full"><div class="pf-label">最近心情</div><input class="pf-input" id="pf-mood" placeholder="用一句話描述最近的狀態"></div>
-        <div class="pf-group full">
-          <div class="pf-label">介面字體大小</div>
-          <div style="display:flex;gap:.8rem;align-items:center;padding:0 .5rem">
-            <span style="font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3)">小</span>
-            <input type="range" id="pf-fontsize" min="0.85" max="1.3" step="0.05" value="1" style="flex:1;accent-color:var(--ink)">
-            <span style="font-family:var(--font-draw);font-size:calc(1.2rem * var(--fs));color:var(--ink3)">大</span>
-          </div>
-        </div>
-        <div class="pf-group full">
-          <div class="pf-label">帳號與資料同步</div>
-          <div id="cloud-status" style="font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink);padding:.6rem;background:var(--paper2);border-radius:8px;border:1.5px solid var(--ink4);text-align:center;line-height:1.4">
-            ⏳ 雲端連線驗證中...
-          </div>
-          <div style="font-size:var(--fs-xs);color:var(--ink3);margin-top:.3rem;text-align:center">系統會自動登入並將您的手帳資料安全備份至雲端。</div>
-        </div>
-        <div class="pf-group full" style="align-items:flex-start">
-          <button class="ink-btn" onclick="saveProfile()" style="width:100%"><svg class="ico-sm" width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12,13.5 L3,13.5 C2.4,13.5 2,13.1 2,12.5 L2,2.5 C2,1.9 2.4,1.5 3,1.5 L10.5,1.5 L13,4 L13,12.5 C13,13.1 12.6,13.5 12,13.5 Z"/><rect x="4.5" y="1.5" width="5" height="3" rx=".5"/><rect x="4" y="8.5" width="7" height="4" rx="1"/></svg> 儲存檔案</button>
-        </div>
-        <div class="pf-group full" style="align-items:flex-start;margin-top:.25rem">
-          <button onclick="resetApp()" style="width:100%;background:none;border:1.5px dashed #C8503A;border-radius:8px 10px 7px 9px;padding:.48rem;font-family:var(--font-draw);font-size:.88rem;color:#C8503A;cursor:pointer;transition:all .2s"><svg class="ico-sm" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12,7 C12,9.8 9.8,12 7,12 C4.2,12 2,9.8 2,7 C2,4.2 4.2,2 7,2 C8.8,2 10.3,2.9 11.2,4.2"/><polyline points="11,1.5 11.5,4.5 8.5,4.5"/></svg> 重置所有資料，從零開始</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="profile-stats" id="profile-stats">
-    <div class="pstat"><div class="ps-num" id="st-cal">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1.5" width="10" height="9" rx="1.5"/><line x1="4" y1=".5" x2="4" y2="3"/><line x1="8" y1=".5" x2="8" y2="3"/><line x1="1" y1="4.5" x2="11" y2="4.5"/></svg> 日記天數</div></div>
-    <div class="pstat"><div class="ps-num" id="st-gems">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,1 11,6 6,11 1,6"/><line x1="1" y1="6" x2="11" y2="6"/><line x1="3" y1="3.5" x2="9" y2="3.5"/></svg> 鑽石總量</div></div>
-    <div class="pstat"><div class="ps-num" id="st-badge">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3,1 L9,1 L9,6.5 C9,8.5 3,8.5 3,6.5 Z"/><line x1="6" y1="8.5" x2="6" y2="10"/><line x1="3.5" y1="10" x2="8.5" y2="10"/></svg> 徽章數量</div></div>
-    <div class="pstat"><div class="ps-num" id="st-spot">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6,1 L1.5,11 L6,9 L10.5,11 Z"/><line x1="6" y1="1" x2="6" y2="9"/><line x1="2.5" y1="7.5" x2="9.5" y2="7.5"/></svg> 拜訪景點</div></div>
-    <div class="pstat"><div class="ps-num" id="st-todo">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,4 3.5,6 7,2"/><line x1="9" y1="4" x2="11" y2="4"/><line x1="1.5" y1="8.5" x2="11" y2="8.5"/></svg> 完成計畫</div></div>
-    <div class="pstat"><div class="ps-num" id="st-days">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="5"/><polyline points="6,3 6,6 8.5,7.5"/></svg> 使用天數</div></div>
-  </div>
-</div>
+<!-- PROFILE MODAL MOVED TO MODALS SECTION -->
 
 <!-- ══════════════════════════════════
      6. ART EVENTS VIEW
@@ -941,6 +937,122 @@ header{
 <!-- ═════════════════
      MODALS
 ═════════════════ -->
+
+<!-- Profile Modal -->
+<div class="overlay" id="profile-modal">
+  <div class="mbox" style="padding:1.4rem;max-width:560px;">
+    <div class="m-top" style="margin-bottom:1.1rem;">
+      <div class="m-title"><svg class="ico-sm" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="4"/><path d="M2,18 C2,13 18,13 18,18"/></svg> 我的檔案與設定</div>
+      <button class="m-close" onclick="closeM('profile-modal')">✕</button>
+    </div>
+    <div class="mtabs" id="profile-tabs" style="margin-bottom:1.2rem;">
+      <button class="mtab on" onclick="ptab('p-info',this)"><svg class="ico-sm" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="2" width="11" height="10" rx="1.5"/><line x1="4" y1="5" x2="6" y2="5"/><line x1="4" y1="8" x2="10" y2="8"/><line x1="4" y1="10" x2="8" y2="10"/></svg> 基本資料</button>
+      <button class="mtab" onclick="ptab('p-cloud',this)"><svg class="ico-sm" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4,9 C2,9 1,7.5 1,5.5 C1,3.5 2.5,2 4.5,2 C5.5,2 6.5,2.5 7,3.5 C8,2 10.5,2 11.5,4 C12.5,4 13.5,5 13.5,6.5 C13.5,8.5 12,9 10,9 L4,9 Z"/><path d="M7,6 L7,13"/><polyline points="4.5,10.5 7,13 9.5,10.5"/></svg> 雲端與帳號</button>
+    </div>
+
+    <!-- TAB 1: INFO -->
+    <div id="tab-p-info">
+      <div class="hcard" style="margin-bottom:1.25rem">
+        <div class="profile-wrap">
+          <div class="profile-avatar">
+            <div class="avatar-ring" id="avatar-display">🐱</div>
+            <div style="display:flex;gap:.3rem;flex-wrap:wrap;justify-content:center">
+              <span onclick="setAvatar('🐱')" style="cursor:pointer;font-size:1.3rem">🐱</span>
+              <span onclick="setAvatar('🦊')" style="cursor:pointer;font-size:1.3rem">🦊</span>
+              <span onclick="setAvatar('🐼')" style="cursor:pointer;font-size:1.3rem">🐼</span>
+              <span onclick="setAvatar('🐨')" style="cursor:pointer;font-size:1.3rem">🐨</span>
+              <span onclick="setAvatar('🦁')" style="cursor:pointer;font-size:1.3rem">🦁</span>
+              <span onclick="setAvatar('🐸')" style="cursor:pointer;font-size:1.3rem">🐸</span>
+            </div>
+          </div>
+          <div class="profile-form" id="profile-form">
+            <div class="pf-group"><div class="pf-label">名字</div><input class="pf-input" id="pf-name" placeholder="你的名字"></div>
+            <div class="pf-group"><div class="pf-label">綽號 / 暱稱</div><input class="pf-input" id="pf-nick" placeholder="大家怎麼叫你？"></div>
+            <div class="pf-group"><div class="pf-label">生日</div><input class="pf-input" type="date" id="pf-birthday"></div>
+            <div class="pf-group">
+              <div class="pf-label">血型</div>
+              <select class="pf-select" id="pf-blood">
+                <option value="">選擇血型</option>
+                <option>A 型</option><option>B 型</option><option>O 型</option><option>AB 型</option>
+              </select>
+            </div>
+            <div class="pf-group">
+              <div class="pf-label">星座</div>
+              <select class="pf-select" id="pf-zodiac">
+                <option value="">選擇星座</option>
+                <option>牡羊座 ♈</option><option>金牛座 ♉</option><option>雙子座 ♊</option>
+                <option>巨蟹座 ♋</option><option>獅子座 ♌</option><option>處女座 ♍</option>
+                <option>天秤座 ♎</option><option>天蠍座 ♏</option><option>射手座 ♐</option>
+                <option>摩羯座 ♑</option><option>水瓶座 ♒</option><option>雙魚座 ♓</option>
+              </select>
+            </div>
+            <div class="pf-group">
+              <div class="pf-label">個性標籤</div>
+              <input class="pf-input" id="pf-persona" placeholder="例如：INFJ、宅宅、話癆">
+            </div>
+            <div class="pf-group full"><div class="pf-label">興趣與愛好</div><input class="pf-input" id="pf-hobby" placeholder="閱讀、旅行、烘焙、打電動…"></div>
+            <div class="pf-group full"><div class="pf-label">座右銘</div><input class="pf-input" id="pf-motto" placeholder="你的人生信條是…"></div>
+            <div class="pf-group full"><div class="pf-label">夢想清單 ✨</div><textarea class="pf-input" id="pf-dream" rows="2" placeholder="這輩子一定要做的事…"></textarea></div>
+            <div class="pf-group full"><div class="pf-label">最近心情</div><input class="pf-input" id="pf-mood" placeholder="用一句話描述最近的狀態"></div>
+            <div class="pf-group full">
+              <div class="pf-label">介面字體大小</div>
+              <div style="display:flex;gap:.8rem;align-items:center;padding:0 .5rem">
+                <span style="font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink3)">小</span>
+                <input type="range" id="pf-fontsize" min="0.85" max="1.3" step="0.05" value="1" style="flex:1;accent-color:var(--ink)">
+                <span style="font-family:var(--font-draw);font-size:calc(1.2rem * var(--fs));color:var(--ink3)">大</span>
+              </div>
+            </div>
+            <div class="pf-group full" style="align-items:flex-start;margin-top:.4rem;">
+              <button class="ink-btn" onclick="saveProfile()" style="width:100%"><svg class="ico-sm" width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12,13.5 L3,13.5 C2.4,13.5 2,13.1 2,12.5 L2,2.5 C2,1.9 2.4,1.5 3,1.5 L10.5,1.5 L13,4 L13,12.5 C13,13.1 12.6,13.5 12,13.5 Z"/><rect x="4.5" y="1.5" width="5" height="3" rx=".5"/><rect x="4" y="8.5" width="7" height="4" rx="1"/></svg> 保留我的設定</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="profile-stats" id="profile-stats">
+        <div class="pstat"><div class="ps-num" id="st-cal">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1.5" width="10" height="9" rx="1.5"/><line x1="4" y1=".5" x2="4" y2="3"/><line x1="8" y1=".5" x2="8" y2="3"/><line x1="1" y1="4.5" x2="11" y2="4.5"/></svg> 日記天數</div></div>
+        <div class="pstat"><div class="ps-num" id="st-gems">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,1 11,6 6,11 1,6"/><line x1="1" y1="6" x2="11" y2="6"/><line x1="3" y1="3.5" x2="9" y2="3.5"/></svg> 鑽石數量</div></div>
+        <div class="pstat"><div class="ps-num" id="st-badge">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3,1 L9,1 L9,6.5 C9,8.5 3,8.5 3,6.5 Z"/><line x1="6" y1="8.5" x2="6" y2="10"/><line x1="3.5" y1="10" x2="8.5" y2="10"/></svg> 徽章數量</div></div>
+        <div class="pstat"><div class="ps-num" id="st-spot">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6,1 L1.5,11 L6,9 L10.5,11 Z"/><line x1="6" y1="1" x2="6" y2="9"/><line x1="2.5" y1="7.5" x2="9.5" y2="7.5"/></svg> 拜訪景點</div></div>
+        <div class="pstat"><div class="ps-num" id="st-todo">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,4 3.5,6 7,2"/><line x1="9" y1="4" x2="11" y2="4"/><line x1="1.5" y1="8.5" x2="11" y2="8.5"/></svg> 完成計畫</div></div>
+        <div class="pstat"><div class="ps-num" id="st-days">0</div><div class="ps-label"><svg class="ico-sm" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="5"/><polyline points="6,3 6,6 8.5,7.5"/></svg> 使用天數</div></div>
+      </div>
+    </div>
+
+    <!-- TAB 2: CLOUD -->
+    <div id="tab-p-cloud" class="hide">
+      <div class="hcard" style="display:flex;flex-direction:column;align-items:center;padding:2rem 1.5rem;">
+        <div style="font-family:var(--font-draw);font-size:var(--fs-xl);font-weight:700;margin-bottom:0.5rem;color:var(--ink);">資料同步與備份</div>
+        <div class="text-muted" style="text-align:center;margin-bottom:1.5rem;line-height:1.6">綁定您的帳號，隨時在不同裝置上找回溫暖的心情回憶。</div>
+        
+        <div style="display:flex;flex-direction:column;gap:0.8rem;width:100%;max-width:280px;margin-bottom:1.5rem;">
+          <button style="background:#fff;border:1.5px solid var(--ink4);border-radius:10px;padding:0.75rem;font-family:var(--font-draw);font-size:var(--fs-md);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:0.6rem;cursor:pointer;box-shadow:2px 3px 0 var(--ink4);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.16v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.16C1.43 8.55 1 10.22 1 12s.43 3.45 1.16 4.93l3.68-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.16 7.07l3.68 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            使用 Google 登入
+          </button>
+          <button style="background:#111;color:#fff;border:1.5px solid #111;border-radius:10px;padding:0.75rem;font-family:var(--font-draw);font-size:var(--fs-md);display:flex;align-items:center;justify-content:center;gap:0.6rem;cursor:pointer;box-shadow:2px 3px 0 rgba(0,0,0,0.2);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M17.05 15.58c-.3.8-.75 1.6-1.35 2.4-1.12 1.55-2.32 3.08-4.05 3.08-1.68 0-2.22-1-4.08-1-1.85 0-2.45 1-4.05 1-1.65 0-2.92-1.6-3.95-3.1C-2.52 13.9.52 8.55 4 8.55c1.62 0 2.85.95 4.08.95 1.25 0 2.78-1.1 4.62-1.1s3.15.52 4.12 1.45c-2.4 1.22-2.02 4.45.22 5.72zM12.02 5.35c.88-1.05 1.48-2.58 1.3-4.1-.18-.02-.38-.02-.58-.02-1.58 0-3.32.78-4.4 2-1 1.08-1.68 2.62-1.4 4.1.2.02.4.02.62.02 1.48 0 3.25-.8 4.45-2z"/></svg>
+            使用 Apple ID 登入
+          </button>
+        </div>
+
+        <div id="cloud-status" style="width:100%;font-family:var(--font-draw);font-size:var(--fs-sm);color:var(--ink);padding:.8rem;background:var(--paper);border-radius:10px;border:1.5px dashed var(--ink4);text-align:center;line-height:1.6;margin-bottom:1.5rem;">
+          <span style="font-weight:700;color:var(--red);">尚未綁定平台</span><br>
+          <span style="color:var(--ink3);font-size:0.9em;">目前的資料僅保存在此裝置中</span>
+        </div>
+
+        <div class="sketch-line" style="width:100%;margin-bottom:1.5rem;"></div>
+
+        <div style="width:100%;">
+          <div class="sec-title" style="font-size:1.1rem;margin-bottom:0.8rem;"><svg class="ico-sm" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#C8503A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14,6 v6 a2,2 0 0,1 -2,2 H4 a2,2 0 0,1 -2,-2 V6 M6,2 v0 a2,2 0 0,1 4,0 v0 M6,9 v3 M10,9 v3" /><line x1="2" y1="5" x2="14" y2="5"/></svg> 危險區域</div>
+          <button onclick="resetApp()" style="width:100%;margin-top:0.3rem;background:none;border:1.5px dashed #C8503A;border-radius:8px 10px 7px 9px;padding:.6rem;font-family:var(--font-draw);font-size:.92rem;color:#C8503A;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:0.4rem;" onmouseover="this.style.background='rgba(200,80,58,0.05)'" onmouseout="this.style.background='none'">
+            重置所有資料，從零開始
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Day Modal -->
 <div class="overlay" id="day-modal">
   <div class="mbox">
@@ -1399,7 +1511,7 @@ const ANIMALS=[
 ═══════════════════════ */
 function loadState(){return JSON.parse(localStorage.getItem('bs2_state')||'null')||{
   profile:{name:'',nick:'',birthday:'',blood:'',zodiac:'',persona:'',hobby:'',motto:'',dream:'',mood:'',avatar:'🐱',fontSize:1},
-  diamonds:0,badges:[],challenges:{date:'',done:[]},
+  diamonds:0,badges:[],challenges:{date:'',done:[]},themes:{unlocked:['default'],active:'default'},
   calData:{},tripData:{},todos:{date:'',items:[]},artViewed:[],
   stats:{calDays:0,totalTodos:0,useSince:new Date().toDateString()},
   history:[]
@@ -1410,12 +1522,15 @@ function saveState(){
 }
 let S=loadState();
 if(!S.history) S.history=[];
+if(!S.themes) S.themes={unlocked:['default'],active:'default'};
 
 window.loadFromCloud=function(cloudS){
   S=cloudS;if(!S.history)S.history=[];
+  if(!S.themes)S.themes={unlocked:['default'],active:'default'};
   localStorage.setItem('bs2_state',JSON.stringify(S));
-  buildCal();buildSpots();buildChallenges();buildBadges();
+  buildCal();buildSpots();buildChallenges();buildBadges();buildThemes();
   renderEvents();initTodos();loadProfile();renderHistory();
+  renderTheme();
 };
 
 function addLog(type,desc,icon){
@@ -1857,6 +1972,70 @@ function checkBadges(){
   buildBadges();
 }
 
+/* ── THEMES ── */
+const THEMES=[
+  {id:'default',n:'經典原味',desc:'手帳的最初感動',cost:0,icon:'📔'},
+  {id:'cat',n:'貓咪風格',desc:'溫暖的肉球與耳朵',cost:15,icon:'🐾'},
+  {id:'succulent',n:'多肉植物',desc:'療癒的綠意與圓潤葉片',cost:15,icon:'🌿'},
+  {id:'color',n:'夢幻色彩',desc:'五彩斑斕的漸層魔術',cost:25,icon:'🌈'}
+];
+
+function buildThemes(){
+  const grid=document.getElementById('themes-grid');
+  if(!grid)return;
+  const diaIco=`<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#5A8FAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><polygon points="6.5,1 12,6.5 6.5,12 1,6.5"/><line x1="1" y1="6.5" x2="12" y2="6.5"/><line x1="3.2" y1="3.8" x2="9.8" y2="3.8"/></svg>`;
+  grid.innerHTML=THEMES.map(t=>{
+    const owned=S.themes.unlocked.includes(t.id);
+    const active=S.themes.active===t.id;
+    const canBuy=!owned&&S.diamonds>=t.cost;
+    let btnHtml='';
+    if(active){
+      btnHtml=`<button class="cc-btn" style="background:var(--green)">已套用</button>`;
+    } else if(owned){
+      btnHtml=`<button class="cc-btn" style="background:var(--ink)" onclick="equipTheme('${t.id}')">套用</button>`;
+    } else {
+      btnHtml=`<button class="cc-btn" style="${canBuy?'':'opacity:0.5'}" onclick="unlockTheme('${t.id}')">${t.cost} ${diaIco} 兌換</button>`;
+    }
+    
+    return`<div class="challenge-card" style="${active?'border-color:var(--ink)':''}">
+      <div class="cc-emoji" style="font-size:1.8rem">${t.icon}</div>
+      <div class="cc-title">${t.n}</div>
+      <div style="font-family:var(--font-draw);font-size:.78rem;color:var(--ink3);margin-bottom:.5rem">${t.desc}</div>
+      ${btnHtml}
+    </div>`;
+  }).join('');
+}
+
+function unlockTheme(id){
+  const t=THEMES.find(x=>x.id===id);if(!t||S.themes.unlocked.includes(id)||S.diamonds<t.cost)return;
+  S.diamonds-=t.cost;S.themes.unlocked.push(id);saveState();
+  buildThemes();buildChallenges();buildBadges();updateProfileStats();
+  document.getElementById('d-count').textContent=S.diamonds;
+  const notif=document.getElementById('badge-notif');
+  document.getElementById('bn-title').textContent=`解鎖主題：${t.n}`;
+  document.getElementById('bn-sub').textContent=`去月曆看看新風格吧！`;
+  notif.classList.add('show');
+  setTimeout(()=>notif.classList.remove('show'),3500);
+}
+
+function equipTheme(id){
+  const t=THEMES.find(x=>x.id===id);if(!t||!S.themes.unlocked.includes(id))return;
+  S.themes.active=id;
+  saveState();
+  renderTheme();
+  buildThemes();
+  addLog('theme', '切換了月曆風格：' + t.n, '🎨');
+}
+
+function renderTheme(){
+  const w=document.querySelector('.cal-wrap');
+  if(!w)return;
+  w.className='cal-wrap'; 
+  if(S.themes.active&&S.themes.active!=='default'){
+    w.classList.add('theme-'+S.themes.active);
+  }
+}
+
 /* ═══════════════════════
    PROFILE
 ═══════════════════════ */
@@ -1865,7 +2044,10 @@ function loadProfile(){
   ['name','nick','birthday','blood','zodiac','persona','hobby','motto','dream','mood'].forEach(k=>{
     const el=document.getElementById('pf-'+k);if(el)el.value=p[k]||'';
   });
-  document.getElementById('avatar-display').textContent=p.avatar||'🐱';
+  const av=p.avatar||'🐱';
+  document.getElementById('avatar-display').textContent=av;
+  const hb=document.getElementById('header-avatar-btn');
+  if(hb) hb.textContent=av;
   updateProfileStats();
 }
 function saveProfile(){
@@ -1877,7 +2059,7 @@ function saveProfile(){
   const btn=event.target;const orig=btn.innerHTML;
   btn.textContent='已儲存';setTimeout(()=>{btn.innerHTML=orig;},1800);
 }
-function setAvatar(em){S.profile.avatar=em;saveState();document.getElementById('avatar-display').textContent=em;}
+function setAvatar(em){S.profile.avatar=em;saveState();document.getElementById('avatar-display').textContent=em;const hb=document.getElementById('header-avatar-btn');if(hb)hb.textContent=em;}
 function updateProfileStats(){
   const calDays=Object.keys(S.calData).filter(k=>k!=='__custom'&&(S.calData[k]?.note||S.calData[k]?.mood)).length;
   const tripCount=Object.keys(S.tripData).filter(k=>S.tripData[k]?.note||S.tripData[k]?.photos?.length).length;
@@ -1949,6 +2131,13 @@ function toggleArtEvent(id){
 ═══════════════════════ */
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
+function openProfileModal(){openM('profile-modal');}
+function ptab(id,btn){
+  document.getElementById('tab-p-info').classList.toggle('hide',id!=='p-info');
+  document.getElementById('tab-p-cloud').classList.toggle('hide',id!=='p-cloud');
+  document.querySelectorAll('#profile-tabs .mtab').forEach(t=>t.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+}
 document.querySelectorAll('.overlay').forEach(o=>{
   o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
 });
@@ -1962,7 +2151,7 @@ function gotoTab(id,btn){
   document.getElementById(id+'-view').classList.add('active');
   if(btn)btn.classList.add('active');
   else{// Find correct button
-    const idx={cal:0,todo:1,travel:2,game:3,profile:4,art:5}[id];
+    const idx={cal:0,todo:1,travel:2,game:3,art:4,history:5}[id];
     document.querySelectorAll('.tab-btn')[idx]?.classList.add('active');
   }
 }
@@ -1990,10 +2179,11 @@ function resetApp(){
 ═══════════════════════ */
 buildCal();
 buildCtabs();buildSpots();
-buildChallenges();buildBadges();
+buildChallenges();buildBadges();buildThemes();
 buildArtFilter();renderEvents();
 initTodos();initCanvas();
 loadProfile();
+renderTheme();
 </script>
 </body>
 </html>
